@@ -16,7 +16,7 @@ class Motor{
         int rpm = 0;
         int gas = 0;
         int idleValve = 0;
-        int pullFactor = 1;
+        int horses = 0;
         std::mutex m_tick;
         void tick(){
             while (running) {
@@ -28,8 +28,9 @@ class Motor{
             }
             rpm = rpm * 0.98;
             if (rpm <= 8500){ // Rev limiter
-            rpm += (gas + idleValve)/pullFactor;
+            rpm += gas + idleValve;
             }
+            horses = rpm * (gas + idleValve);
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Adjust sleep time as needed
                }
         }
@@ -106,13 +107,9 @@ int main(){
              }
             if (event.key.code == sf::Keyboard::Key::Up){
                     std::cout << "Shifted up\n";
-                    motor.rpm -= 1000;
-                    motor.pullFactor += 1;
                 }
                 if (event.key.code == sf::Keyboard::Key::Down){
                     std::cout << "Shifted down\n";
-                    motor.rpm += 1000;
-                    motor.pullFactor -= 1;
                 }
 
             }
@@ -132,7 +129,7 @@ int main(){
 
         
         float angle = motor.rpm/50; // Set the desired angle in degrees
-        gaugeValue.setString("RPM: " + std::to_string(motor.rpm));
+        gaugeValue.setString("RPM: " + std::to_string(motor.rpm) + " Power: " + std::to_string(motor.horses));
         tach.setRotation(angle);
 
         // Clear the window with a black background
