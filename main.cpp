@@ -33,7 +33,9 @@ class Motor{
             rpm = rpm * lazyValue; // Drag
             if (rpm>0){
                 rpm += horses/rpm;
-                horses = rpm * (gas+idleValve)*throttleResponse;
+                if (rpm<=8500){
+                horses = rpm * (gas+idleValve)*throttleResponse;}
+                else {horses = 0;}
             }
             rpm += clutch * 0.1;
             clutch = 0.9 * clutch;
