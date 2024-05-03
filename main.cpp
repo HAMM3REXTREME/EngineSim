@@ -17,7 +17,7 @@ struct Car {
 
   int gear = 0; // Gearing
   float gearRatios[7] = {0,0.5, 0.7 , 0.9, 1.1, 1.4 , 1.6};
-  float gearLazyValues[7] = {0.99, 0.999, 0.9995, 0.9996, 0.9997, 0.9998, 0.999};
+  float gearLazyValues[7] = {0.99, 0.999, 0.9995, 0.9996, 0.9997, 0.9998, 0.9999};
   float gearThrottleResponses[7] = {1, 0.1 , 0.06, 0.05, 0.04, 0.035, 0.03};
   
   
@@ -59,7 +59,7 @@ struct Car {
 
       // Wheel RPM depending on the engine rpm , current gear ratio and coasting drag
       if (gear >= 1) {
-        wheelRPM = rpm * gear * 0.6 * coastLazyValue * brakeFactor;
+        wheelRPM = rpm * gearRatios[gear] * coastLazyValue * brakeFactor;
         rpm = rpm * brakeFactor;
       } else {
         wheelRPM = wheelRPM * coastLazyValue * brakeFactor;
@@ -71,8 +71,8 @@ struct Car {
   }
   void setGear(int newGear) {
     gear = newGear;
-    if (newGear > 0) {
-      clutch = wheelRPM / (newGear * 0.6) - rpm;
+    if (gear > 0) {
+      clutch = wheelRPM / gearRatios[gear] - rpm;
       if (wheelRPM <= 0) {
         clutch = 500 - rpm; // rpm + clutch would be 500 (since clutch takes a rev difference that it smoothly applies)
         return;
@@ -171,7 +171,7 @@ int main() {
         }
         if (event.key.code == sf::Keyboard::Key::Period) {
           std::cout << "Brakes on\n";
-          car.brakeFactor = 0.99;
+          car.brakeFactor = 0.996;
         }
 
         if (event.key.code == sf::Keyboard::Key::S) {
