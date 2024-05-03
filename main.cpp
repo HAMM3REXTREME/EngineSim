@@ -9,28 +9,35 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <vector>
 
 class Motor{
     public:
         bool running;
         int rpm = 0;
         int gas = 0;
-        int idleValve = 0;
+        int idleValve = 1;
         int horses = 0;
+        double lazyValue = 0.99;
+        double throttleResponse = 1;
+        int clutch = 0;
         std::mutex m_tick;
         void tick(){
             while (running) {
             std::lock_guard<std::mutex> lock(m_tick);
-            if (rpm >= 700){ // Idle air control valve
-                idleValve = 5;
-            } else if (rpm <= 600) {
-                idleValve = 15;
+            if (rpm >= 800){ // Idle air control valve
+                idleValve = 1;
+            } else if (rpm <= 700) {
+                idleValve = 30;
             }
-            rpm = rpm * 0.98;
-            if (rpm <= 8500){ // Rev limiter
-            rpm += gas + idleValve;
+            rpm = rpm * lazyValue; // Drag
+            if (rpm>0){
+                rpm += horses/rpm;
+                horses = rpm * (gas+idleValve)*throttleResponse;
             }
-            horses = rpm * (gas + idleValve);
+            rpm += clutch * 0.1;
+            clutch = 0.9 * clutch;
+            
             std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Adjust sleep time as needed
                }
         }
@@ -76,7 +83,22 @@ int main(){
     sf::RectangleShape tach(sf::Vector2f(250.f, 6.f)); // Size of the tach
     tach.setFillColor(sf::Color::Red); // Color of the tach
     tach.setPosition(400.f, 300.f); // Position of the tach
-    tach.setOrigin(250.f, 3.f); // Center of rotation    
+    tach.setOrigin(250.f, 3.f); // Center of rotation
+
+    std::map<sf::Keyboard::Key, int> userThrottleMap;
+            userThrottleMap[sf::Keyboard::Key::Q] = 50;
+            userThrottleMap[sf::Keyboard::Key::W] = 100;
+            userThrottleMap[sf::Keyboard::Key::E] = 150;
+            userThrottleMap[sf::Keyboard::Key::R] = 215;
+            userThrottleMap[sf::Keyboard::Key::T] = 300;
+
+    std::vector<std::pair<float,float>> gearMap(6);
+    int currentGear = 0;
+    gearMap[0] = {0.99,1};
+    gearMap[1] = {0.999, 0.1};
+    gearMap[2] = {0.9995, 0.06};
+    gearMap[3] = {0.9996, 0.05};
+    gearMap[4] = {0.9997, 0.04};
 
     // Main loop - keep the window open until it's closed
     while (window.isOpen()) {
@@ -92,12 +114,6 @@ int main(){
 
             }
             // Key press events
-            std::map<sf::Keyboard::Key, int> userThrottleMap;
-            userThrottleMap[sf::Keyboard::Key::Q] = 50;
-            userThrottleMap[sf::Keyboard::Key::W] = 100;
-            userThrottleMap[sf::Keyboard::Key::E] = 150;
-            userThrottleMap[sf::Keyboard::Key::R] = 215;
-            userThrottleMap[sf::Keyboard::Key::T] = 300;
 
             if (event.type == sf::Event::KeyPressed) {
                 auto it = userThrottleMap.find(event.key.code);
@@ -106,12 +122,30 @@ int main(){
                   motor.gas = it->second;
              }
             if (event.key.code == sf::Keyboard::Key::Up){
-                    std::cout << "Shifted up\n";
+                    if (currentGear+1 < gearMap.size()){
+                    currentGear += 1;
+                    motor.lazyValue = gearMap[currentGear].first;
+                    motor.throttleResponse = gearMap[currentGear].second;
+                    //motor.horses -= 9000000;
+                    motor.clutch -= 1000;
+                    std::cout << "Shifted up\n";}
                 }
                 if (event.key.code == sf::Keyboard::Key::Down){
+                    if (currentGear > 0){
+                    currentGear -= 1;
+                    motor.lazyValue = gearMap[currentGear].first;
+                    motor.throttleResponse = gearMap[currentGear].second;
+                    //motor.horses += 9000000;
+                    motor.clutch += 1000;
                     std::cout << "Shifted down\n";
+                    }
+
                 }
 
+            if (event.key.code == sf::Keyboard::Key::S){
+                motor.rpm = 500;
+                    std::cout << "Starter\n";
+                }
             }
 
             // Key release events
@@ -129,7 +163,7 @@ int main(){
 
         
         float angle = motor.rpm/50; // Set the desired angle in degrees
-        gaugeValue.setString("RPM: " + std::to_string(motor.rpm) + " Power: " + std::to_string(motor.horses));
+        gaugeValue.setString("RPM: " + std::to_string(motor.rpm) + " Current power output: " + std::to_string(motor.horses) + " Gear: " + std::to_string(currentGear));
         tach.setRotation(angle);
 
         // Clear the window with a black background
