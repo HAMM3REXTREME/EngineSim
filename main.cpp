@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 #include <thread>
-#include <cmath>
 #include "Car.h"
 
 
@@ -60,11 +59,11 @@ int main() {
 
   // Map user keyboard input into differen levels of throttle 
   std::map<sf::Keyboard::Key, int> userThrottleMap;
-  userThrottleMap[sf::Keyboard::Key::Q] = 50;
-  userThrottleMap[sf::Keyboard::Key::W] = 100;
-  userThrottleMap[sf::Keyboard::Key::E] = 150;
-  userThrottleMap[sf::Keyboard::Key::R] = 215;
-  userThrottleMap[sf::Keyboard::Key::T] = 300;
+  userThrottleMap[sf::Keyboard::Key::Q] = 30;
+  userThrottleMap[sf::Keyboard::Key::W] = 50;
+  userThrottleMap[sf::Keyboard::Key::E] = 80;
+  userThrottleMap[sf::Keyboard::Key::R] = 130;
+  userThrottleMap[sf::Keyboard::Key::T] = 150;
 
   while (window.isOpen()) {
     sf::Event event;
