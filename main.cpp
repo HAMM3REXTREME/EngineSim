@@ -118,6 +118,10 @@ int main() {
                     car.setRPM(500);
                     std::cout << "Starter\n";
                 }
+                if (event.key.code == sf::Keyboard::Key::A) {
+                    car.ignition = !car.ignition;
+                    std::cout << "Set ignition to " << car.ignition << "\n";
+                }
             }
             // Key release events
             if (event.type == sf::Event::KeyReleased) {

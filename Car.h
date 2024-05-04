@@ -46,7 +46,8 @@ class Damper {
 
 class Car {
    public:
-    bool running;  // Is car running
+    bool running = false;  // Is car running - pauses tick when off
+    bool ignition = false; // Ignition
 
     // Gearing
     float gearRatios[7] = {0, 1.1, 1.4, 1.6, 1.9, 2.4, 2.8};
@@ -60,6 +61,8 @@ class Car {
     // Wheel
     double coastLazyValue = 0.999;  // Driving drag on wheels (and also engine if in gear)
     float brakeFactor = 1;          // Brake Drag on wheels (and also engine if in gear) - Basically the same as coastLazyValue
+
+    float clutchKick = 0.6; // Clutch jerkiness (1 is smooth)
 
     std::mutex m_tick;
     void tick() {
@@ -75,7 +78,7 @@ class Car {
             rpm = rpm * lazyValue;
             if (rpm > 0) {
                 rpm += horses / rpm;
-                if (rpm <= 8000) {  // Rev limiter thingy
+                if (rpm <= 8000 && ignition) {  // Rev limiter thingy
                     horses = rpm * (gas + idleValve) * throttleResponse * brakeFactor;
                 } else {
                     horses = 0;
@@ -135,7 +138,6 @@ class Car {
     int gear = 0;         // Gearing
 
     float clutch = 0;  // Difference of revs to 'smoothly' join
-    float clutchKick = 0.3;
 
     Damper rpmDamper{5};
     Damper wheelSpeedDamper{10};
