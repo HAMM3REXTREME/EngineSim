@@ -34,10 +34,7 @@ int main() {
   gaugeValue.setFillColor(sf::Color::White);
   gaugeValue.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
 
-  sf::Clock clock;
-
-  Damper wheelSpeedDamp(10);
-  Damper revDamp(10);
+  sf::Clock clock; // For FPS
 
   // Tachometer graphics
   sf::Texture texture;
@@ -150,6 +147,8 @@ int main() {
     window.draw(gaugeValue);
 
     window.display();
+
+    // TODO: Add a proper fps limiter
     sf::Time sleepTime = sf::seconds(0.01);
     sf::sleep(sleepTime);
   }
