@@ -7,8 +7,11 @@
 #include <string>
 #include <thread>
 
-#include "Car.h"
-// #include <fmod.hpp>
+#include "include/Car.h"
+
+/* #include "include/fmod_studio.hpp"
+#include "include/fmod_studio_common.h"
+#include "include/fmod_errors.h" */
 
 int main() {
     Car car;
@@ -23,7 +26,7 @@ int main() {
 
     // Text Information
     sf::Font font;
-    if (!font.loadFromFile("Race-Sport.ttf")) {
+    if (!font.loadFromFile("assets/Race-Sport.ttf")) {
         car.running = false;
         vroom.join();
         std::cerr << "Failed to load font" << std::endl;
@@ -37,7 +40,7 @@ int main() {
 
     // Tachometer graphics
     sf::Texture texture;
-    if (!texture.loadFromFile("race_tach.png")) {
+    if (!texture.loadFromFile("assets/race_tach.png")) {
         car.running = false;
         vroom.join();
         return EXIT_FAILURE;
