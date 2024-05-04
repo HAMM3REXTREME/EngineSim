@@ -90,7 +90,7 @@ class Car {
             // Wheel RPM depending on the engine rpm , current gear ratio and coasting drag
             if (gear >= 1) {
                 wheelRPM = rpm * gearRatios[gear] * coastLazyValue * brakeFactor;
-                rpm = rpm * brakeFactor;
+                rpm = rpm * brakeFactor; // * coastLazyValue; // Add this or don't doesn't really matter too much
             } else {
                 wheelRPM = wheelRPM * coastLazyValue * brakeFactor;
             }
