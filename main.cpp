@@ -1,13 +1,16 @@
+#include "Car.h"
+#include <SFML/Config.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/System/Time.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <iostream>
 #include <map>
 #include <string>
 #include <thread>
-#include "Car.h"
-
+// #include <fmod.hpp>
 
 int main() {
+
   Car car;
   car.running = true;
 
@@ -30,7 +33,11 @@ int main() {
   gaugeValue.setCharacterSize(16);
   gaugeValue.setFillColor(sf::Color::White);
   gaugeValue.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
-  
+
+  sf::Clock clock;
+
+  Damper wheelSpeedDamp(10);
+  Damper revDamp(10);
 
   // Tachometer graphics
   sf::Texture texture;
@@ -52,12 +59,13 @@ int main() {
   tach.setOrigin(250.f, 3.f);                        // Center of rotation
 
   // Speedometer meter
-  sf::RectangleShape speedo(sf::Vector2f(150.f, 6.f));  // Size of the speedo
-  speedo.setFillColor(sf::Color::Red);                  // Color of the speedo
-  speedo.setPosition(1024.f / 2.f, 768.f / 2.f - 75.f); // Position of the speedo
-  speedo.setOrigin(150.f, 3.f);                         // Center of rotation
+  sf::RectangleShape speedo(sf::Vector2f(150.f, 6.f)); // Size of the speedo
+  speedo.setFillColor(sf::Color::Red);                 // Color of the speedo
+  speedo.setPosition(1024.f / 2.f,
+                     768.f / 2.f - 75.f); // Position of the speedo
+  speedo.setOrigin(150.f, 3.f);           // Center of rotation
 
-  // Map user keyboard input into differen levels of throttle 
+  // Map user keyboard input into differen levels of throttle
   std::map<sf::Keyboard::Key, int> userThrottleMap;
   userThrottleMap[sf::Keyboard::Key::Q] = 30;
   userThrottleMap[sf::Keyboard::Key::W] = 50;
@@ -67,6 +75,8 @@ int main() {
 
   while (window.isOpen()) {
     sf::Event event;
+    sf::Time elapsed = clock.restart();
+    float fps = 1.0f / elapsed.asSeconds();
     while (window.pollEvent(event)) {
       if (event.type == sf::Event::Closed) {
         window.close();
@@ -76,25 +86,25 @@ int main() {
         auto it = userThrottleMap.find(event.key.code);
         if (it != userThrottleMap.end()) {
           std::cout << "Accelerator at " << it->second << " \n";
-          car.gas = it->second;
+          car.setGas(it->second);
         }
         if (event.key.code == sf::Keyboard::Key::Up) {
           std::cout << "Shifted Up\n";
-          car.setGear(car.gear + 1);
-          car.lazyValue = car.gearLazyValues[car.gear];
-          car.throttleResponse = car.gearThrottleResponses[car.gear];
+          car.setGear(car.getGear() + 1);
+          car.lazyValue = car.gearLazyValues[car.getGear()];
+          car.throttleResponse = car.gearThrottleResponses[car.getGear()];
         }
         if (event.key.code == sf::Keyboard::Key::Down) {
           std::cout << "Shifted Down\n";
-          car.setGear(car.gear - 1);
-          car.lazyValue = car.gearLazyValues[car.gear];
-          car.throttleResponse = car.gearThrottleResponses[car.gear];
+          car.setGear(car.getGear() - 1);
+          car.lazyValue = car.gearLazyValues[car.getGear()];
+          car.throttleResponse = car.gearThrottleResponses[car.getGear()];
         }
         if (event.key.code == sf::Keyboard::Key::LShift) {
           std::cout << "To neutral\n";
           car.setGear(0);
-          car.lazyValue = car.gearLazyValues[car.gear];
-          car.throttleResponse = car.gearThrottleResponses[car.gear];
+          car.lazyValue = car.gearLazyValues[car.getGear()];
+          car.throttleResponse = car.gearThrottleResponses[car.getGear()];
         }
         if (event.key.code == sf::Keyboard::Key::Period) {
           std::cout << "Brakes on\n";
@@ -103,17 +113,18 @@ int main() {
 
         if (event.key.code == sf::Keyboard::Key::S) {
           // One strong starter
-          car.rpm = 500;
+          car.setRPM(500);
           std::cout << "Starter\n";
         }
       }
       // Key release events
       if (event.type == sf::Event::KeyReleased) {
-        // If one of the keys in out throttle map is released, release the throttle
+        // If one of the keys in out throttle map is released, release the
+        // throttle
         auto it = userThrottleMap.find(event.key.code);
         if (it != userThrottleMap.end()) {
           std::cout << "Accelerator released\n";
-          car.gas = 0;
+          car.setGas(0);
         }
         if (event.key.code == sf::Keyboard::Key::Period) {
           std::cout << "Brakes off\n";
@@ -122,15 +133,14 @@ int main() {
       }
     }
 
-    tach.setRotation(car.rpm / 30 - 90);
-    speedo.setRotation(car.wheelRPM / 100);
+    tach.setRotation(car.getRPM() / 30 - 90);
+    speedo.setRotation(car.getWheelSpeed() / 100);
 
-    gaugeValue.setString(
-        std::to_string((int)car.rpm) + " RPM\n" +
-        std::to_string((int)car.horses) + " Horses\n" + 
-        std::to_string(car.gear) + "\n" + 
-        std::to_string((int)car.wheelRPM/100) + " kmh");
-
+    gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" +
+                         std::to_string((int)car.getHorses()) + " Horses\n" +
+                         std::to_string(car.getGear()) + "\n" +
+                         std::to_string((int)car.getWheelSpeed() / 100) +
+                         " kmh\n" + std::to_string((int)fps) + " FPS");
 
     window.clear(sf::Color::Black);
 
@@ -140,9 +150,12 @@ int main() {
     window.draw(gaugeValue);
 
     window.display();
+    sf::Time sleepTime = sf::seconds(0.01);
+    sf::sleep(sleepTime);
   }
 
   car.running = false;
   vroom.join();
+
   return 0;
 }
