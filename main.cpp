@@ -24,7 +24,7 @@ int main() {
         return -1;
     }
 
-    // Initialize the system
+    // Initialize the Audio system
     result = system->initialize(1024, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr);
     if (result != FMOD_OK) {
         std::cerr << "FMOD System initialization failed: " << FMOD_ErrorString(result) << std::endl;
@@ -48,7 +48,7 @@ int main() {
     }
 
     // Get the Vehicle/Car Sound event
-    const char* eventName = "event:/V8";  // Replace with your event path
+    const char* eventName = "event:/Vehicles/Car Engine";  // Replace with your event path
     result = system->getEvent(eventName, &carSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
@@ -148,22 +148,16 @@ int main() {
                 if (event.key.code == sf::Keyboard::Key::Up) {
                     std::cout << "Shifted Up\n";
                     car.setGear(car.getGear() + 1);
-                    car.lazyValue = car.gearLazyValues[car.getGear()];
-                    car.throttleResponse = car.gearThrottleResponses[car.getGear()];
                 }
                 // Downshift
                 if (event.key.code == sf::Keyboard::Key::Down) {
                     std::cout << "Shifted Down\n";
                     car.setGear(car.getGear() - 1);
-                    car.lazyValue = car.gearLazyValues[car.getGear()];
-                    car.throttleResponse = car.gearThrottleResponses[car.getGear()];
                 }
                 // Shift to N
                 if (event.key.code == sf::Keyboard::Key::LShift) {
                     std::cout << "To neutral\n";
                     car.setGear(0);
-                    car.lazyValue = car.gearLazyValues[car.getGear()];
-                    car.throttleResponse = car.gearThrottleResponses[car.getGear()];
                 }
                 // Brakes
                 if (event.key.code == sf::Keyboard::Key::Period) {
@@ -210,9 +204,9 @@ int main() {
             std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
         }
-        result = carSoundEventInstance->setParameterByName("Load", car.getGas());
+        result = carSoundEventInstance->setParameterByName("Load", car.getGas()/80);
         if (result != FMOD_OK) {
-            std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
+            std::cerr << "Setting Load parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
         }
         system->update();

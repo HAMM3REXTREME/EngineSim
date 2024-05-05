@@ -107,6 +107,8 @@ class Car {
 
     void setGear(int newGear) {
         gear = newGear;
+        lazyValue = gearLazyValues[newGear];
+        throttleResponse = gearThrottleResponses[newGear];
         if (gear > 0) {
             clutch = wheelRPM / gearRatios[gear] - rpm;
             if (wheelRPM <= 0) {
