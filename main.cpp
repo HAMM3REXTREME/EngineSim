@@ -125,6 +125,16 @@ int main() {
     userThrottleMap[sf::Keyboard::Key::R] = 130;
     userThrottleMap[sf::Keyboard::Key::T] = 150;
 
+    // Keyboard to gear
+    std::map<sf::Keyboard::Key, int> userGearShifter;
+    userGearShifter[sf::Keyboard::Key::Num0] = 0;
+    userGearShifter[sf::Keyboard::Key::Num1] = 1;
+    userGearShifter[sf::Keyboard::Key::Num2] = 2;
+    userGearShifter[sf::Keyboard::Key::Num3] = 3;
+    userGearShifter[sf::Keyboard::Key::Num4] = 4;
+    userGearShifter[sf::Keyboard::Key::Num5] = 5;
+    userGearShifter[sf::Keyboard::Key::Num6] = 6;
+
     // Main loop
     while (window.isOpen()) {
         sf::Event event;
@@ -144,16 +154,13 @@ int main() {
                     std::cout << "Accelerator at " << it->second << " \n";
                     car.setGas(it->second);
                 }
-                // Upshift
-                if (event.key.code == sf::Keyboard::Key::Up) {
-                    std::cout << "Shifted Up\n";
-                    car.setGear(car.getGear() + 1);
+ 
+                auto gearIt = userGearShifter.find(event.key.code);
+                if (gearIt != userGearShifter.end()) {
+                    std::cout << "Shifted to " << gearIt->second << " \n";
+                    car.setGear(gearIt->second);
                 }
-                // Downshift
-                if (event.key.code == sf::Keyboard::Key::Down) {
-                    std::cout << "Shifted Down\n";
-                    car.setGear(car.getGear() - 1);
-                }
+
                 // Shift to N
                 if (event.key.code == sf::Keyboard::Key::LShift) {
                     std::cout << "To neutral\n";
