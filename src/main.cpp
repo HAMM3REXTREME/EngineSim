@@ -207,7 +207,7 @@ int main() {
         tach.setRotation(car.getRPM() / 30 - 90);
         speedo.setRotation(car.getWheelSpeed() / 100);
         // Set gauge display
-        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string((int)car.getHorses()) + " Horses\n" + std::to_string(car.getGear()) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) +
+        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(car.getGear()) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) +
                              " FPS");
 
         // Set the fmod RPM parameter

@@ -76,7 +76,7 @@ class Car {
                 idleValve = 30;
             }
             rpm = rpm * lazyValue;
-            if (rpm > 0) {
+            if (rpm > 10) {
                 rpm += horses / rpm;
                 if (rpm <= 8000 && ignition) {  // Rev limiter thingy
                     horses = rpm * (gas + idleValve) * throttleResponse * brakeFactor;
