@@ -1,0 +1,27 @@
+{34f54f36-2a90-4a3c-a280-e09632cf8257} bank:/Vehicles
+{ace86fe2-5beb-067e-24c9-6a68c33c84cf} bank:/Vehicles.strings
+{af9d027a-3a1f-49a8-a9ef-4cbe20673632} bus:/
+{7e33a2b3-db05-4b7a-ba1e-e862f2bfde36} bus:/Music
+{d320eb98-3d4a-4cd9-a001-fdb4e071c58e} bus:/SFX
+{d9982c58-a056-4e6c-b8e3-883854b4bffb} bus:/SFX/Ambience
+{3e1d1653-8bd5-4dbc-865e-cba8e8ded970} bus:/SFX/Character
+{da23c66c-e512-4a93-98dc-02d6f58e4c5a} bus:/SFX/Explosions
+{009ebac0-e5a9-4e69-8d37-6bdc9d8c6f45} bus:/SFX/Objects
+{524ae5a9-928c-4391-9635-34b41d4602af} bus:/SFX/Reverb
+{37ebea86-d649-4a7a-b7b5-25701bfce8e9} bus:/SFX/Vehicles
+{dd124d8d-1ccd-4871-a160-5024e3e3f116} bus:/SFX/Weapons
+{670390e5-527e-4f22-8654-b0326c9cc0c6} bus:/UI
+{69d0d47a-7f4b-4d6c-bfc3-bda91e9f7f1f} bus:/VO
+{0c8363b4-23af-4f9c-af4b-0951bfd37d84} event:/Vehicles/Car Engine
+{7aa5e8f1-8ec2-42c6-b465-1241a603a055} event:/Vehicles/Ride-on Mower
+{e25821f0-cab8-48f7-94c9-fef8b0f68286} parameter:/Vehicles/Car Engine/RPM
+{3e8e56fe-6058-430e-af80-ca44be8ee759} parameter:/Vehicles/Load
+{27917f63-d316-4f46-95a0-a271283fb8ad} parameter:/Vehicles/Ride-on Mower/RPM
+{87ea4134-fff1-4e9d-8f8b-294a2b518223} snapshot:/Health Low
+{e305a498-2b18-461d-b35c-6eaea45fafd6} snapshot:/Pause
+{b695eec0-fe78-4755-b806-9690c06dfc0b} snapshot:/Reverb/Cave Reverb
+{c107e28e-873b-4caa-9492-68fe72210c48} snapshot:/Reverb/Sewer Reverb
+{6e8d8d09-12e0-48cf-b620-f9cc3bc478a3} snapshot:/Slow-Motion
+{3f0b7d64-e765-400e-ae74-c2d973ad4ca1} vca:/Environment
+{bf15a3f1-6824-492a-8cb1-db2383349f1b} vca:/Equipment
+{62d29c9d-bd2f-46ac-8dea-c37c666f3cfd} vca:/Player

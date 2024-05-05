@@ -1,3 +1,5 @@
 a.out
-fmod
-lib
+engine-sim
+.fmod
+obj
+Assets/editable/FMOD-Studio/.cache

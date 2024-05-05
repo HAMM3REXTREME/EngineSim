@@ -50,7 +50,7 @@ class Car {
     bool ignition = false; // Ignition
 
     // Gearing
-    float gearRatios[7] = {0, 1.1, 1.4, 1.6, 1.9, 2.4, 2.8};
+    float gearRatios[7] = {0, 0.8, 1.3, 1.8, 2.3, 2.7, 3.5};
     float gearLazyValues[7] = {0.99, 0.999, 0.9995, 0.9996, 0.9997, 0.9998, 0.9999};
     float gearThrottleResponses[7] = {1, 0.15, 0.08, 0.06, 0.05, 0.04, 0.035};
 

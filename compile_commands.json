@@ -1,0 +1,16 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/clang++",
+      "-O2",
+      "-Iinclude",
+      "-c",
+      "-o",
+      "obj/main.o",
+      "src/main.cpp"
+    ],
+    "directory": "/home/hemanya/Development/EngineSound",
+    "file": "/home/hemanya/Development/EngineSound/src/main.cpp",
+    "output": "/home/hemanya/Development/EngineSound/obj/main.o"
+  }
+]
