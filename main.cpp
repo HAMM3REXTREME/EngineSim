@@ -1,3 +1,4 @@
+// Engine Simulator - Simplified model
 #include <SFML/Config.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
@@ -69,21 +70,14 @@ int main() {
         return -1;
     }
 
-    Car car;
-    car.running = true;
-
-    // Car
-    std::thread vroom(&Car::tick, std::ref(car));
-
     // Create a window
-    sf::RenderWindow window(sf::VideoMode(1024, 768), "VROOM");
+    sf::RenderWindow window(sf::VideoMode(1024, 768), "Car Simulator");
     sf::Clock clock;  // For FPS display
+
 
     // Text Information
     sf::Font font;
     if (!font.loadFromFile("assets/Race-Sport.ttf")) {
-        car.running = false;
-        vroom.join();
         std::cerr << "Failed to load font" << std::endl;
         return EXIT_FAILURE;
     }
@@ -93,11 +87,11 @@ int main() {
     gaugeValue.setFillColor(sf::Color::White);
     gaugeValue.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
 
+
     // Tachometer graphics
     sf::Texture texture;
     if (!texture.loadFromFile("assets/race_tach.png")) {
-        car.running = false;
-        vroom.join();
+        std::cerr << "Failed to load tachometer" << std::endl;
         return EXIT_FAILURE;
     }
     sf::Sprite sprite(texture);
@@ -105,19 +99,22 @@ int main() {
     sprite.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
     sprite.setScale(0.3f, 0.3f);
 
+
     // Tachometer needle
     sf::RectangleShape tach(sf::Vector2f(250.f, 6.f));  // Size of the tach
     tach.setFillColor(sf::Color::Red);                  // Color of the tach
     tach.setPosition(1024.f / 2.f, 768.f / 2.f);        // Position of the tach
     tach.setOrigin(250.f, 3.f);                         // Center of rotation
 
-    // Speedometer meter
+
+    // Speedometer needle
     sf::RectangleShape speedo(sf::Vector2f(150.f, 6.f));   // Size of the speedo
     speedo.setFillColor(sf::Color::Red);                   // Color of the speedo
     speedo.setPosition(1024.f / 2.f, 768.f / 2.f - 75.f);  // Position of the speedo
     speedo.setOrigin(150.f, 3.f);                          // Center of rotation
 
-    // Map user keyboard input into differen levels of throttle
+
+    // Map user keyboard input to differen levels of throttle
     std::map<sf::Keyboard::Key, int> userThrottleMap;
     userThrottleMap[sf::Keyboard::Key::Q] = 30;
     userThrottleMap[sf::Keyboard::Key::W] = 50;
@@ -125,7 +122,8 @@ int main() {
     userThrottleMap[sf::Keyboard::Key::R] = 130;
     userThrottleMap[sf::Keyboard::Key::T] = 150;
 
-    // Keyboard to gear
+
+    // Keyboard to gears
     std::map<sf::Keyboard::Key, int> userGearShifter;
     userGearShifter[sf::Keyboard::Key::Num0] = 0;
     userGearShifter[sf::Keyboard::Key::Num1] = 1;
@@ -134,6 +132,20 @@ int main() {
     userGearShifter[sf::Keyboard::Key::Num4] = 4;
     userGearShifter[sf::Keyboard::Key::Num5] = 5;
     userGearShifter[sf::Keyboard::Key::Num6] = 6;
+    // Numpad H-pattern
+    userGearShifter[sf::Keyboard::Key::Numpad5] = 0;
+    userGearShifter[sf::Keyboard::Key::Numpad7] = 1;
+    userGearShifter[sf::Keyboard::Key::Numpad1] = 2;
+    userGearShifter[sf::Keyboard::Key::Numpad8] = 3;
+    userGearShifter[sf::Keyboard::Key::Numpad2] = 4;
+    userGearShifter[sf::Keyboard::Key::Numpad9] = 5;
+    userGearShifter[sf::Keyboard::Key::Numpad3] = 6;
+
+
+    Car car;
+    car.running = true;
+    std::thread vroom(&Car::tick, std::ref(car));
+
 
     // Main loop
     while (window.isOpen()) {
@@ -167,7 +179,7 @@ int main() {
                     car.setGear(0);
                 }
                 // Brakes
-                if (event.key.code == sf::Keyboard::Key::Period) {
+                if (event.key.code == sf::Keyboard::Key::Numpad0) {
                     std::cout << "Brakes on\n";
                     car.brakeFactor = 0.996;
                 }
@@ -191,7 +203,7 @@ int main() {
                     car.setGas(0);
                 }
                 // Disengage brakes
-                if (event.key.code == sf::Keyboard::Key::Period) {
+                if (event.key.code == sf::Keyboard::Key::Numpad0) {
                     std::cout << "Brakes off\n";
                     car.brakeFactor = 1;
                 }
