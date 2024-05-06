@@ -48,7 +48,7 @@ int main() {
     }
 
     // Get the Vehicle/Car Sound event
-    const char* eventName = "event:/Vehicles/Vehicle";  // Replace with your event path
+    const char* eventName = "event:/Vehicles/Car Engine";  // Replace with your event path
     result = audioSystem->getEvent(eventName, &carSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;

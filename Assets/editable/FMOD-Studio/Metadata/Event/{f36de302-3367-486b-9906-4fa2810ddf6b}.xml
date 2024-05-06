@@ -110,6 +110,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<destination>{0ce46d91-d141-4a84-a4c8-e0f656ca78f1}</destination>
 			<destination>{f12ae78d-ea94-4585-aa02-93f3f20285a0}</destination>
 			<destination>{ba423060-b6f1-4640-85b4-8b3b2b11d83a}</destination>
+			<destination>{025e3dd3-e7f9-4a5a-88ee-062272e45757}</destination>
 		</relationship>
 		<relationship name="mixerGroup">
 			<destination>{3850671f-2afc-42de-b60f-64ff6880dcd4}</destination>
@@ -130,6 +131,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<destination>{0ce46d91-d141-4a84-a4c8-e0f656ca78f1}</destination>
 			<destination>{f12ae78d-ea94-4585-aa02-93f3f20285a0}</destination>
 			<destination>{ba423060-b6f1-4640-85b4-8b3b2b11d83a}</destination>
+			<destination>{025e3dd3-e7f9-4a5a-88ee-062272e45757}</destination>
 		</relationship>
 		<relationship name="preset">
 			<destination>{e25821f0-cab8-48f7-94c9-fef8b0f68286}</destination>
@@ -196,7 +198,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>3</value>
 		</property>
 		<property name="volume">
-			<value>4</value>
+			<value>-16</value>
 		</property>
 		<property name="looping">
 			<value>true</value>
@@ -317,6 +319,9 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 		<property name="length">
 			<value>6200</value>
 		</property>
+		<property name="volume">
+			<value>-10</value>
+		</property>
 		<relationship name="modulators">
 			<destination>{f37aa1b6-c30b-4c95-bc67-fd021df098ff}</destination>
 		</relationship>
@@ -426,6 +431,26 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<destination>{62539dc1-70a4-488a-bcf0-76baff4c0add}</destination>
 		</relationship>
 	</object>
+	<object class="SingleSound" id="{025e3dd3-e7f9-4a5a-88ee-062272e45757}">
+		<property name="start">
+			<value>6000</value>
+		</property>
+		<property name="length">
+			<value>4000</value>
+		</property>
+		<relationship name="modulators">
+			<destination>{0422d4f4-6895-47f6-8b9a-1e49ef2a384d}</destination>
+		</relationship>
+		<relationship name="fadeInCurve">
+			<destination>{662e186f-9361-461c-80bf-bc75e026e713}</destination>
+		</relationship>
+		<relationship name="fadeOutCurve">
+			<destination>{518be881-8779-4824-809d-37263b40f3b7}</destination>
+		</relationship>
+		<relationship name="audioFile">
+			<destination>{ed4ecc3e-4e97-43e9-bbeb-99517b1dc5b9}</destination>
+		</relationship>
+	</object>
 	<object class="EventMixerGroup" id="{3850671f-2afc-42de-b60f-64ff6880dcd4}">
 		<property name="name">
 			<value>190E-16V</value>
@@ -457,7 +482,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>1100</value>
+			<value>3000</value>
 		</property>
 		<property name="pitchAtMinimum">
 			<value>0.159999996</value>
@@ -484,7 +509,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>8900</value>
+			<value>10000</value>
 		</property>
 		<property name="pitchAtMinimum">
 			<value>0.810000002</value>
@@ -511,7 +536,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>3950</value>
+			<value>8750</value>
 		</property>
 	</object>
 	<object class="FadeCurve" id="{ef32d936-a537-47f1-8351-b760008b101c}">
@@ -538,7 +563,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>2250</value>
+			<value>4600</value>
 		</property>
 	</object>
 	<object class="FadeCurve" id="{ce5420f0-ca54-415a-ae4b-d8f4c340643f}">
@@ -565,7 +590,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>5450</value>
+			<value>7450</value>
 		</property>
 	</object>
 	<object class="FadeCurve" id="{3fd69ca1-e187-4746-ab47-201d694e51dc}">
@@ -613,7 +638,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>6050</value>
+			<value>7500</value>
 		</property>
 	</object>
 	<object class="FadeCurve" id="{b0f44b6c-9e71-464c-93db-9e9ba487fa08}">
@@ -637,7 +662,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>7300</value>
+			<value>8700</value>
 		</property>
 		<property name="pitchAtMinimum">
 			<value>0.810000002</value>
@@ -657,6 +682,30 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 		</relationship>
 		<relationship name="endPoint">
 			<destination>{883a10e9-dbcd-4f18-859f-36eead9617e1}</destination>
+		</relationship>
+	</object>
+	<object class="AutopitchModulator" id="{0422d4f4-6895-47f6-8b9a-1e49ef2a384d}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>pitch</value>
+		</property>
+		<property name="root">
+			<value>7500</value>
+		</property>
+	</object>
+	<object class="FadeCurve" id="{662e186f-9361-461c-80bf-bc75e026e713}">
+		<relationship name="startPoint">
+			<destination>{72f94898-2beb-494d-a8db-445e4d7c8b75}</destination>
+		</relationship>
+		<relationship name="endPoint">
+			<destination>{9084fcff-bbe8-4228-a5b4-2f5078ad529b}</destination>
+		</relationship>
+	</object>
+	<object class="FadeCurve" id="{518be881-8779-4824-809d-37263b40f3b7}">
+		<relationship name="startPoint">
+			<destination>{21d72242-7049-4422-b4d5-912e860138ae}</destination>
+		</relationship>
+		<relationship name="endPoint">
+			<destination>{13a331f1-39ab-4ff4-b427-5a8de352465e}</destination>
 		</relationship>
 	</object>
 	<object class="Automator" id="{716c44de-fdc1-4e28-b25f-22d1f4d76dd8}">
@@ -713,7 +762,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 	</object>
 	<object class="AutomationPoint" id="{63e08c37-48fb-4019-8aef-b544f678389d}">
 		<property name="position">
-			<value>999.99999999999977</value>
+			<value>1700</value>
 		</property>
 		<property name="value">
 			<value>1</value>
@@ -743,7 +792,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 	</object>
 	<object class="AutomationPoint" id="{d2db4295-8484-4b23-8fd6-469d4a6a73f4}">
 		<property name="position">
-			<value>3600.000244140625</value>
+			<value>6600</value>
 		</property>
 		<property name="value">
 			<value>1</value>
@@ -819,7 +868,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 	</object>
 	<object class="AutomationPoint" id="{74ee790a-560b-4cc6-9388-6fe9bd0a7c7d}">
 		<property name="position">
-			<value>1700</value>
+			<value>2000</value>
 		</property>
 		<property name="value">
 			<value>1</value>
@@ -857,7 +906,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 	</object>
 	<object class="AutomationPoint" id="{68b9ab5b-7039-4e08-9660-2654657c4563}">
 		<property name="position">
-			<value>2200</value>
+			<value>4900</value>
 		</property>
 		<property name="value">
 			<value>1</value>
@@ -865,7 +914,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 	</object>
 	<object class="AutomationPoint" id="{8558b87d-bee1-487c-ae7e-6d704dd69faa}">
 		<property name="position">
-			<value>7000</value>
+			<value>5100</value>
 		</property>
 		<property name="value">
 			<value>1</value>
@@ -933,7 +982,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 	</object>
 	<object class="AutomationPoint" id="{539b41cd-db1a-444c-8f6c-2555b79ce92a}">
 		<property name="position">
-			<value>2900</value>
+			<value>5700</value>
 		</property>
 		<property name="value">
 			<value>1</value>
@@ -991,6 +1040,44 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 	<object class="AutomationPoint" id="{883a10e9-dbcd-4f18-859f-36eead9617e1}">
 		<property name="position">
 			<value>9900</value>
+		</property>
+		<property name="value">
+			<value>0</value>
+		</property>
+	</object>
+	<object class="AutomationPoint" id="{72f94898-2beb-494d-a8db-445e4d7c8b75}">
+		<property name="position">
+			<value>6000</value>
+		</property>
+		<property name="value">
+			<value>0</value>
+		</property>
+		<property name="curveShape">
+			<value>-0.25471887</value>
+		</property>
+	</object>
+	<object class="AutomationPoint" id="{9084fcff-bbe8-4228-a5b4-2f5078ad529b}">
+		<property name="position">
+			<value>7109.85205078125</value>
+		</property>
+		<property name="value">
+			<value>1</value>
+		</property>
+	</object>
+	<object class="AutomationPoint" id="{21d72242-7049-4422-b4d5-912e860138ae}">
+		<property name="position">
+			<value>9100</value>
+		</property>
+		<property name="value">
+			<value>1</value>
+		</property>
+		<property name="curveShape">
+			<value>0.25471893</value>
+		</property>
+	</object>
+	<object class="AutomationPoint" id="{13a331f1-39ab-4ff4-b427-5a8de352465e}">
+		<property name="position">
+			<value>10000</value>
 		</property>
 		<property name="value">
 			<value>0</value>
