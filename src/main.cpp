@@ -7,11 +7,22 @@
 #include <map>
 #include <string>
 #include <thread>
+#include <chrono>
 
 #include "Car.h"
 #include "fmod/fmod_errors.h"
 #include "fmod/fmod_studio.hpp"
 #include "fmod/fmod_studio_common.h"
+
+void manageCar(Car* car){
+      sf::Clock gameClock;
+     while(car->running){
+        sf::Time elapsed = gameClock.restart();
+        double dt = elapsed.asMilliseconds();
+        car->tick(dt);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+     }
+}
 
 int main() {
     FMOD::Studio::System* audioSystem = nullptr;
@@ -138,7 +149,7 @@ int main() {
 
     Car car;
     car.running = true;
-    std::thread vroom(&Car::tick, std::ref(car));
+    std::thread carThread{manageCar, &car};
 
     // Main loop
     while (window.isOpen()) {
@@ -151,6 +162,12 @@ int main() {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+                if (event.type == sf::Event::Resized)
+    {
+        // update the view to the new size of the window
+        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+        window.setView(sf::View(visibleArea));
+    }
             // Key press events
             if (event.type == sf::Event::KeyPressed) {
                 // Accelerator options
@@ -249,7 +266,7 @@ int main() {
     }
 
     car.running = false;
-    vroom.join();
+    carThread.join();
 
     return 0;
 }

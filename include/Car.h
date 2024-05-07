@@ -65,11 +65,8 @@ class Car {
     float clutchKick = 0.6; // Clutch jerkiness (1 is smooth)
 
     std::mutex m_tick;
-    void tick() {
-        while (running) {
-            // TODO: Fix broken multithreading
+    void tick(double dt) {
             std::lock_guard<std::mutex> lock(m_tick);
-
             if (rpm >= 800) {  // Idle air control valve
                 idleValve = 1;
             } else if (rpm <= 700) {
@@ -100,9 +97,6 @@ class Car {
 
             rpmDamper.addValue(rpm);
             wheelSpeedDamper.addValue(wheelRPM);
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));  // Farts per second
-        }
     }
 
     void setGear(int newGear) {
