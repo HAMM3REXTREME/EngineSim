@@ -5,7 +5,7 @@ CXX := clang++
 ARCH := $(shell uname -m)
 
 # Compiler flags
-CXXFLAGS := -O2
+CXXFLAGS := -O2 -g
 
 # SFML flags
 SFMLFLAGS := -lsfml-graphics -lsfml-window -lsfml-system
