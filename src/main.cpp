@@ -95,6 +95,9 @@ int main() {
         std::cerr << "Creating event instance failed: " << FMOD_ErrorString(result) << std::endl;
         return -1;
     }
+
+    bool isStarting = false;  // Starter
+
     // Create a window
     sf::RenderWindow window(sf::VideoMode(1024, 768), "Car Simulator");
     sf::Clock clock;  // For FPS display
@@ -207,14 +210,17 @@ int main() {
                 }
                 // Crude Starter
                 if (event.key.code == sf::Keyboard::Key::S) {
-                    result = starterSoundEventInstance->start();
-                    if (result != FMOD_OK) {
-                        std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
-                        return -1;
+                    if (!isStarting) {
+                        result = starterSoundEventInstance->start();
+                        if (result != FMOD_OK) {
+                            std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
+                            return -1;
+                        }
+                        // One strong starter
+                        car.setRPM(800);
+                        std::cout << "Starter\n";
                     }
-                    // One strong starter
-                    car.setRPM(800);
-                    std::cout << "Starter\n";
+                    isStarting = true;
                 }
                 if (event.key.code == sf::Keyboard::Key::A) {
                     car.ignition = !car.ignition;
@@ -233,6 +239,10 @@ int main() {
                 if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
                     std::cout << "Brakes released\n";
                     car.brakeFactor = 1;
+                }
+                if (event.key.code == sf::Keyboard::Key::S) {
+                    isStarting = false;
+                    std::cout << "Starter Off\n";
                 }
             }
         }
