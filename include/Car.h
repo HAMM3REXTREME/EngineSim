@@ -1,13 +1,8 @@
 #ifndef CAR_H
 #define CAR_H
 
-#include <chrono>
-#include <iostream>
-#include <map>
 #include <mutex>
 #include <queue>
-#include <string>
-#include <thread>
 
 // Averages float values
 class Damper {
@@ -18,111 +13,44 @@ class Damper {
    public:
     Damper(int size) : maxSize(size) {}
 
-    void addValue(double value) {
-        values.push(value);
-        if (values.size() > maxSize) {
-            values.pop();
-        }
-    }
+    void addValue(double value);
 
-    double getAverage() {
-        if (values.empty()) {
-            return 0.0;  // Return 0 if queue is empty
-        }
-
-        double sum = 0.0;
-        int count = 0;
-        std::queue<double> temp = values;  // Create a copy of the queue
-
-        while (!temp.empty()) {
-            sum += temp.front();
-            temp.pop();
-            count++;
-        }
-
-        return sum / count;
-    }
+    double getAverage();
 };
 
 class Car {
    public:
-    bool running = false;  // Is car running - pauses tick when off
-    bool ignition = false; // Ignition
+    bool ignition = false;    // Ignition
+    bool revLimiter = false;  // Triggered when revs are too high
+    int revLimit = 8000;      // Gas will be cut when rev limit is reached
 
-    // Gearing
-    float gearRatios[7] = {0, 0.8, 1.3, 1.8, 2.3, 2.7, 3.5};
-    float gearLazyValues[7] = {0.99, 0.999, 0.9995, 0.9996, 0.9997, 0.9998, 0.9999};
-    float gearThrottleResponses[7] = {1, 0.15, 0.08, 0.06, 0.05, 0.04, 0.035};
+    float gearRatios[7] = {0, 0.8, 1.3, 1.8, 2.3, 2.7, 3.5};                          // Gearing ratios - Used to match engine rpm to wheel rpm
+    float gearLazyValues[7] = {0.99, 0.999, 0.9995, 0.9996, 0.9997, 0.9998, 0.9999};  // Engine time for revs to settle back - values closer to one need more time to go back to idle cause less resistance (exponential decay)
+    float gearThrottleResponses[7] = {1, 0.15, 0.08, 0.06, 0.05, 0.04, 0.035};        // Throttle sensitivity - Should feel lower in higher gears since the high gears is hard on the engine.
 
-    // Engine
-    double lazyValue = 0.99;      // Engine time for revs to settle back - values closer to one need more time to go back to idle
-    double throttleResponse = 1;  // Throttle sensitivity - Should feel lower in higher gears since we reduce the value after every upshift bruh
-
-    // Wheel
+    // Wheel resistances
     double coastLazyValue = 0.999;  // Driving drag on wheels (and also engine if in gear)
     float brakeFactor = 1;          // Brake Drag on wheels (and also engine if in gear) - Basically the same as coastLazyValue
 
-    float clutchKick = 0.6; // Clutch jerkiness (1 is smooth)
+    float clutchKick = 0.6;  // Clutch jerkiness (1 is smooth)
 
     std::mutex m_tick;
-    void tick(double dt) {
-            std::lock_guard<std::mutex> lock(m_tick);
-            if (rpm >= 800) {  // Idle air control valve
-                idleValve = 1;
-            } else if (rpm <= 700) {
-                idleValve = 30;
-            }
-            rpm = rpm * lazyValue;
-            if (rpm > 10) {
-                rpm += horses / rpm;
-                if (rpm <= 8000 && ignition) {  // Rev limiter thingy
-                    horses = rpm * (gas + idleValve) * throttleResponse * brakeFactor;
-                } else {
-                    horses = 0;
-                }
-            }
 
-            // Apply clutch revs in multiple smaller chunks of revs, makes a kick, like dumping the clutch in a real car
-            // Idk how this works
-            rpm += clutch * clutchKick;
-            clutch = (1.0 - clutchKick) * clutch;
+    void tick();
 
-            // Wheel RPM depending on the engine rpm , current gear ratio and coasting drag
-            if (gear >= 1) {
-                wheelRPM = rpm * gearRatios[gear] * coastLazyValue * brakeFactor;
-                rpm = rpm * brakeFactor; // * coastLazyValue; // Add this or don't doesn't really matter too much
-            } else {
-                wheelRPM = wheelRPM * coastLazyValue * brakeFactor;
-            }
+    void setGear(int newGear);
+    int getGear();
 
-            rpmDamper.addValue(rpm);
-            wheelSpeedDamper.addValue(wheelRPM);
-    }
+    void setGas(float newGas);
+    float getGas();
 
-    void setGear(int newGear) {
-        gear = newGear;
-        lazyValue = gearLazyValues[newGear];
-        throttleResponse = gearThrottleResponses[newGear];
-        if (gear > 0) {
-            clutch = wheelRPM / gearRatios[gear] - rpm;
-            if (wheelRPM <= 0) {
-                clutch = 500 - rpm;  // rpm + clutch would be 500 (since clutch takes a rev difference that it smoothly applies)
-                return;
-            }
-        }
-    }
-    int getGear() { return gear; }
+    void setRPM(float newRPM);  // Sets rpm for next tick
+    float getRPM();
 
-    void setGas(float newGas) { gas = newGas; }
-    float getGas() { return gas; }
+    void setWheelSpeed(float newSpeed);  // Sets wheelRPM for next tick
+    float getWheelSpeed();
 
-    void setRPM(float newRPM) { rpm = newRPM; }  // Sets rpm for next tick
-    float getRPM() { return rpmDamper.getAverage(); }
-
-    void setWheelSpeed(float newSpeed) { wheelRPM = newSpeed; }  // Sets wheelRPM for next tick
-    float getWheelSpeed() { return wheelSpeedDamper.getAverage(); }
-
-    float getHorses() { return horses; }
+    float getHorses();
 
    private:
     float gas = 0;       // Throttle body
@@ -131,12 +59,15 @@ class Car {
 
     float idleValve = 1;  // Idle valve
     float horses = 0;     // Power produced immediately
-    int gear = 0;         // Gearing
+    int gear = 0;         // Current Gear
 
     float clutch = 0;  // Difference of revs to 'smoothly' join
 
     Damper rpmDamper{5};
     Damper wheelSpeedDamper{10};
+
+    void controlIdle();
+    void addEnergy();
 };
 
 #endif

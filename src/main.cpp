@@ -3,25 +3,23 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <atomic>
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <string>
 #include <thread>
-#include <chrono>
 
 #include "Car.h"
 #include "fmod/fmod_errors.h"
 #include "fmod/fmod_studio.hpp"
 #include "fmod/fmod_studio_common.h"
 
-void manageCar(Car* car){
-      sf::Clock gameClock;
-     while(car->running){
-        sf::Time elapsed = gameClock.restart();
-        double dt = elapsed.asMilliseconds();
-        car->tick(dt);
+void manageCar(Car* car, std::atomic<bool>* run) {
+    while (*run) {
+        car->tick();
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
-     }
+    }
 }
 
 int main() {
@@ -30,6 +28,8 @@ int main() {
     FMOD::Studio::Bank* masterBankStr = nullptr;
     FMOD::Studio::EventDescription* carSoundEventDescription = nullptr;
     FMOD::Studio::EventInstance* carSoundEventInstance = nullptr;
+    FMOD::Studio::EventDescription* starterSoundEventDescription = nullptr;
+    FMOD::Studio::EventInstance* starterSoundEventInstance = nullptr;
 
     FMOD_RESULT result = FMOD::Studio::System::create(&audioSystem);
     if (result != FMOD_OK) {
@@ -59,7 +59,7 @@ int main() {
     }
 
     // Get the Vehicle/Car Sound event
-    const char* eventName = "event:/Vehicles/Car Engine";  // Replace with your event path
+    const char* eventName = "event:/Vehicles/Sport Sedan";  // Replace with your event path
     result = audioSystem->getEvent(eventName, &carSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
@@ -79,7 +79,22 @@ int main() {
         std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
         return -1;
     }
-
+    const char* starterEventName = "event:/Vehicles/Starters/Middle";  // Replace with your event path
+    result = audioSystem->getEvent(starterEventName, &starterSoundEventDescription);
+    if (result != FMOD_OK) {
+        std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
+        return -1;
+    }
+    result = starterSoundEventDescription->createInstance(&starterSoundEventInstance);
+    if (result != FMOD_OK) {
+        std::cerr << "Creating event instance failed: " << FMOD_ErrorString(result) << std::endl;
+        return -1;
+    }
+    result = starterSoundEventDescription->createInstance(&starterSoundEventInstance);
+    if (result != FMOD_OK) {
+        std::cerr << "Creating event instance failed: " << FMOD_ErrorString(result) << std::endl;
+        return -1;
+    }
     // Create a window
     sf::RenderWindow window(sf::VideoMode(1024, 768), "Car Simulator");
     sf::Clock clock;  // For FPS display
@@ -145,11 +160,9 @@ int main() {
     userGearShifter[sf::Keyboard::Key::Numpad9] = 5;
     userGearShifter[sf::Keyboard::Key::Numpad3] = 6;
 
-
-
     Car car;
-    car.running = true;
-    std::thread carThread{manageCar, &car};
+    std::atomic<bool> carRunning = true;
+    std::thread carThread{manageCar, &car, &carRunning};
 
     // Main loop
     while (window.isOpen()) {
@@ -162,12 +175,11 @@ int main() {
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
-                if (event.type == sf::Event::Resized)
-    {
-        // update the view to the new size of the window
-        sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
-        window.setView(sf::View(visibleArea));
-    }
+            if (event.type == sf::Event::Resized) {
+                // update the view to the new size of the window
+                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(visibleArea));
+            }
             // Key press events
             if (event.type == sf::Event::KeyPressed) {
                 // Accelerator options
@@ -176,7 +188,7 @@ int main() {
                     std::cout << "Accelerator at " << it->second << " \n";
                     car.setGas(it->second);
                 }
-
+                // Gear shifter
                 auto gearIt = userGearShifter.find(event.key.code);
                 if (gearIt != userGearShifter.end()) {
                     std::cout << "Shifted to " << gearIt->second << " \n";
@@ -189,14 +201,19 @@ int main() {
                     car.setGear(0);
                 }
                 // Brakes
-                if (event.key.code == sf::Keyboard::Key::Numpad0) {
+                if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
                     std::cout << "Brakes on\n";
                     car.brakeFactor = 0.996;
                 }
                 // Crude Starter
                 if (event.key.code == sf::Keyboard::Key::S) {
+                    result = starterSoundEventInstance->start();
+                    if (result != FMOD_OK) {
+                        std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
+                        return -1;
+                    }
                     // One strong starter
-                    car.setRPM(500);
+                    car.setRPM(800);
                     std::cout << "Starter\n";
                 }
                 if (event.key.code == sf::Keyboard::Key::A) {
@@ -213,8 +230,8 @@ int main() {
                     car.setGas(0);
                 }
                 // Disengage brakes
-                if (event.key.code == sf::Keyboard::Key::Numpad0) {
-                    std::cout << "Brakes off\n";
+                if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
+                    std::cout << "Brakes released\n";
                     car.brakeFactor = 1;
                 }
             }
@@ -224,8 +241,7 @@ int main() {
         tach.setRotation(car.getRPM() / 30 - 90);
         speedo.setRotation(car.getWheelSpeed() / 100);
         // Set gauge display
-        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(car.getGear()) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) +
-                             " FPS");
+        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(car.getGear()) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) + " FPS");
 
         // Set the fmod RPM parameter
         result = carSoundEventInstance->setParameterByName("RPM", car.getRPM());
@@ -233,7 +249,7 @@ int main() {
             std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
         }
-        result = carSoundEventInstance->setParameterByName("Load", car.getGas() / 80);
+        result = carSoundEventInstance->setParameterByName("Load", car.revLimiter ? car.getGas() / 80 : 0);
         if (result != FMOD_OK) {
             std::cerr << "Setting Load parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
@@ -265,7 +281,7 @@ int main() {
         std::cerr << "Releasing FMOD System failed: " << FMOD_ErrorString(result) << std::endl;
     }
 
-    car.running = false;
+    carRunning = false;
     carThread.join();
 
     return 0;
