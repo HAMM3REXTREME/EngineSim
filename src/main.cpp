@@ -215,8 +215,8 @@ int main() {
                     std::cout << "Brakes on\n";
                     car.brakeFactor = 0.996;
                 }
-                // Crude Starter
                 if (event.key.code == sf::Keyboard::Key::S) {
+                    // Only allow starting if not already in the process of being started, otherwise we can attempt to start.
                     if (!isStarting) {
                         result = starterSoundEventInstance->start();
                         if (result != FMOD_OK) {
@@ -262,6 +262,7 @@ int main() {
 
         // Move needles
         tach.setRotation(car.getRPM() / 30 - 90);
+        // Wheel speed, rpm whatever
         speedo.setRotation(car.getWheelSpeed() / 100);
         // Set gauge display
         gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(car.getGear()) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) + " FPS");
@@ -304,6 +305,7 @@ int main() {
         std::cerr << "Releasing FMOD System failed: " << FMOD_ErrorString(result) << std::endl;
     }
 
+    // Car thread exit
     carRunning = false;
     carThread.join();
 

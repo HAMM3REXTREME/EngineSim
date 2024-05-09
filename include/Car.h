@@ -20,7 +20,7 @@ class Damper {
 
 class Car {
    public:
-    bool ignition = false;    // Ignition
+    bool ignition = false;  // Ignition
 
     // Rev limiter
     int defaultRevLimitTick = 5;  // Cuts off gas for n ticks if rev limit is reached.
@@ -29,7 +29,7 @@ class Car {
 
     float gearRatios[7] = {0, 0.8, 1.3, 1.8, 2.3, 2.7, 3.5};                          // Gearing ratios - Used to match engine rpm to wheel rpm
     float gearLazyValues[7] = {0.99, 0.999, 0.9994, 0.9995, 0.9996, 0.9997, 0.9998};  // Engine time for revs to settle back - values closer to one need more time to go back to idle cause less resistance (exponential decay)
-    float gearThrottleResponses[7] = {1, 0.3, 0.18, 0.15, 0.13, 0.11, 0.09};        // Throttle sensitivity - Should feel lower in higher gears since the high gears is hard on the engine.
+    float gearThrottleResponses[7] = {1, 0.3, 0.18, 0.15, 0.13, 0.11, 0.09};          // Throttle sensitivity - Should feel lower in higher gears since the high gears is hard on the engine.
 
     // Wheel resistances
     double coastLazyValue = 0.999;  // Driving drag on wheels (and also engine if in gear)
