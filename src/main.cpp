@@ -223,9 +223,9 @@ int main() {
                             std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
                             return -1;
                         }
-                        // One strong starter
+                        // Push to start.
                         std::cout << "Starting car...\n";
-                        std::thread acceleratorResetThread([&car, &isStarting]() {
+                        std::thread starterThread([&car, &isStarting]() {
                             std::this_thread::sleep_for(std::chrono::milliseconds(800));
                             std::cout << "Vroom!\n";
                             car.setRPM(800);
@@ -235,7 +235,7 @@ int main() {
                             std::this_thread::sleep_for(std::chrono::milliseconds(1500));
                             isStarting = false;
                         });
-                        acceleratorResetThread.detach();
+                        starterThread.detach();
                     }
                     isStarting = true;
                 }
