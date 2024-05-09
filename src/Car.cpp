@@ -44,7 +44,7 @@ void Car::tick() {
     // Set Wheel RPM depending on the engine rpm, current gear ratio and coasting drag
     if (gear >= 1) {
         wheelRPM = rpm * gearRatios[gear] * coastLazyValue * brakeFactor;
-        rpm = rpm * brakeFactor;  // * coastLazyValue; // Add this or don't doesn't really matter too much
+        rpm = rpm * brakeFactor * coastLazyValue;
     } else {
         // Just apply the rolling and brake resistance if in neutral
         wheelRPM = wheelRPM * coastLazyValue * brakeFactor;
@@ -64,6 +64,36 @@ void Car::setGear(int newGear) {
         }
     }
 }
+
+void Car::controlIdle() {
+    if (rpm >= 800) {  // Idle air control valve
+        idleValve = 5;
+    } else if (rpm <= 700) {
+        idleValve = 10;
+    }
+}
+
+void Car::addEnergy() {
+    if (rpm > 50) {
+        rpm += horses / rpm;  // Don't divide by zero
+        if (ignition) {
+            if (rpm <= revLimit) {  // Rev limiter thingy
+                if (revLimitTick <= 0) {
+                    horses = rpm * (gas + idleValve) * gearThrottleResponses[gear] * brakeFactor;
+                } else {
+                    revLimitTick--;
+                }
+            } else {
+                revLimitTick = defaultRevLimitTick;
+                horses = 0;
+            }
+
+        } else {
+            horses = 0;
+        }
+    }
+}
+
 int Car::getGear() { return gear; }
 
 void Car::setGas(float newGas) { gas = newGas; }
@@ -76,29 +106,3 @@ void Car::setWheelSpeed(float newSpeed) { wheelRPM = newSpeed; }  // Sets wheelR
 float Car::getWheelSpeed() { return wheelSpeedDamper.getAverage(); }
 
 float Car::getHorses() { return horses; }
-
-void Car::controlIdle() {
-    if (rpm >= 800) {  // Idle air control valve
-        idleValve = 1;
-    } else if (rpm <= 700) {
-        idleValve = 30;
-    }
-}
-
-void Car::addEnergy() {
-    if (rpm > 10) {
-        rpm += horses / rpm;  // Don't divide by zero
-        if (ignition) {
-            if (rpm <= revLimit) {  // Rev limiter thingy
-                revLimiter = false;
-                horses = rpm * (gas + idleValve) * gearThrottleResponses[gear] * brakeFactor;
-            } else {
-                revLimiter = true;
-                horses = 0;
-            }
-
-        } else {
-            horses = 0;
-        }
-    }
-}

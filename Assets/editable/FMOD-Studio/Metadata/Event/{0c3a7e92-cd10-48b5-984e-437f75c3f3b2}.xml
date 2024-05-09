@@ -318,7 +318,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>3</value>
 		</property>
 		<property name="volume">
-			<value>5.5</value>
+			<value>4</value>
 		</property>
 		<property name="looping">
 			<value>true</value>
@@ -599,7 +599,7 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>pitch</value>
 		</property>
 		<property name="root">
-			<value>6200</value>
+			<value>6800</value>
 		</property>
 	</object>
 	<object class="FadeCurve" id="{c2c40766-287c-4298-968a-a66f3cbf9b71}">
@@ -816,12 +816,12 @@ Recordings by David Nichols of Track Time Audio. Engine is a 1985 Mercedes-Benz 
 			<value>0</value>
 		</property>
 		<property name="curveShape">
-			<value>-0.306806624</value>
+			<value>-0.422020018</value>
 		</property>
 	</object>
 	<object class="AutomationPoint" id="{bf3fe080-4b98-4ade-9830-8b2ebda7f4f3}">
 		<property name="position">
-			<value>7100</value>
+			<value>7800</value>
 		</property>
 		<property name="value">
 			<value>1</value>

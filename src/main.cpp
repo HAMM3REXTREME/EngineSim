@@ -79,7 +79,7 @@ int main() {
         std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
         return -1;
     }
-    const char* starterEventName = "event:/Vehicles/Starters/Middle";  // Replace with your event path
+    const char* starterEventName = "event:/Vehicles/Starters/Full";  // Replace with your event path
     result = audioSystem->getEvent(starterEventName, &starterSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
@@ -197,11 +197,18 @@ int main() {
                     std::cout << "Shifted to " << gearIt->second << " \n";
                     car.setGear(gearIt->second);
                 }
-
                 // Shift to N
                 if (event.key.code == sf::Keyboard::Key::LShift) {
                     std::cout << "To neutral\n";
                     car.setGear(0);
+                }
+                if (event.key.code == sf::Keyboard::Key::Up) {
+                    std::cout << "Sequential upshift\n";
+                    car.setGear(car.getGear() + 1);
+                }
+                if (event.key.code == sf::Keyboard::Key::Down) {
+                    std::cout << "Sequential downshift\n";
+                    car.setGear(car.getGear() - 1);
                 }
                 // Brakes
                 if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
@@ -217,8 +224,18 @@ int main() {
                             return -1;
                         }
                         // One strong starter
-                        car.setRPM(800);
-                        std::cout << "Starter\n";
+                        std::cout << "Starting car...\n";
+                        std::thread acceleratorResetThread([&car, &isStarting]() {
+                            std::this_thread::sleep_for(std::chrono::milliseconds(800));
+                            std::cout << "Vroom!\n";
+                            car.setRPM(800);
+                            car.setGas(150);
+                            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                            car.setGas(0);
+                            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+                            isStarting = false;
+                        });
+                        acceleratorResetThread.detach();
                     }
                     isStarting = true;
                 }
@@ -240,10 +257,6 @@ int main() {
                     std::cout << "Brakes released\n";
                     car.brakeFactor = 1;
                 }
-                if (event.key.code == sf::Keyboard::Key::S) {
-                    isStarting = false;
-                    std::cout << "Starter Off\n";
-                }
             }
         }
 
@@ -259,7 +272,7 @@ int main() {
             std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
         }
-        result = carSoundEventInstance->setParameterByName("Load", car.revLimiter ? car.getGas() / 80 : 0);
+        result = carSoundEventInstance->setParameterByName("Load", car.revLimitTick > 0 ? 0 : car.getGas() / 80);
         if (result != FMOD_OK) {
             std::cerr << "Setting Load parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
