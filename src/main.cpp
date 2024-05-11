@@ -2,6 +2,7 @@
 #include <SFML/Config.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/Window/Joystick.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <atomic>
 #include <chrono>
@@ -21,6 +22,18 @@ void manageCar(Car* car, std::atomic<bool>* run) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
+
+void carStarter(Car* car, bool* isStarting) {
+                            std::this_thread::sleep_for(std::chrono::milliseconds(800));
+                            std::cout << "Vroom!\n";
+                            car->setRPM(800);
+                            car->setGas(150);
+                            std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                            car->setGas(0);
+                            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+                            *isStarting = false;
+                        }
+
 
 int main() {
     FMOD::Studio::System* audioSystem = nullptr;
@@ -96,8 +109,6 @@ int main() {
         return -1;
     }
 
-    bool isStarting = false;  // Starter
-
     // Create a window
     sf::RenderWindow window(sf::VideoMode(1024, 768), "Car Simulator");
     sf::Clock clock;  // For FPS display
@@ -167,6 +178,10 @@ int main() {
     std::atomic<bool> carRunning = true;
     std::thread carThread{manageCar, &car, &carRunning};
 
+    bool isStarting = false;  // Starter sequence thingy
+    bool fakeClutched = false;
+    int fakeGear = car.getGear();
+
     // Main loop
     while (window.isOpen()) {
         sf::Event event;
@@ -195,20 +210,24 @@ int main() {
                 auto gearIt = userGearShifter.find(event.key.code);
                 if (gearIt != userGearShifter.end()) {
                     std::cout << "Shifted to " << gearIt->second << " \n";
-                    car.setGear(gearIt->second);
+                    fakeGear = gearIt->second;
+                    fakeClutched ? car.setGear(0) : car.setGear(gearIt->second);
                 }
                 // Shift to N
                 if (event.key.code == sf::Keyboard::Key::LShift) {
-                    std::cout << "To neutral\n";
+                    std::cout << "Clutch in\n";
+                    fakeClutched = true;
                     car.setGear(0);
                 }
                 if (event.key.code == sf::Keyboard::Key::Up) {
                     std::cout << "Sequential upshift\n";
-                    car.setGear(car.getGear() + 1);
+                    fakeGear++;
+                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
                 }
                 if (event.key.code == sf::Keyboard::Key::Down) {
                     std::cout << "Sequential downshift\n";
-                    car.setGear(car.getGear() - 1);
+                    fakeGear--;
+                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
                 }
                 // Brakes
                 if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
@@ -225,16 +244,7 @@ int main() {
                         }
                         // Push to start.
                         std::cout << "Starting car...\n";
-                        std::thread starterThread([&car, &isStarting]() {
-                            std::this_thread::sleep_for(std::chrono::milliseconds(800));
-                            std::cout << "Vroom!\n";
-                            car.setRPM(800);
-                            car.setGas(150);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(300));
-                            car.setGas(0);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-                            isStarting = false;
-                        });
+                        std::thread starterThread{carStarter, &car, &isStarting};
                         starterThread.detach();
                     }
                     isStarting = true;
@@ -257,6 +267,48 @@ int main() {
                     std::cout << "Brakes released\n";
                     car.brakeFactor = 1;
                 }
+                if (event.key.code == sf::Keyboard::Key::LShift) {
+                    std::cout << "Clutch out\n";
+                    fakeClutched = false;
+                    car.setGear(fakeGear);
+                }
+            }
+            if (event.type == sf::Event::JoystickButtonPressed) {
+                // std::cout << "Pressed controller: " << event.joystickButton.button <<"\n";
+                if (event.joystickButton.button == 0) {
+                    std::cout << "Sequential upshift\n";
+                    fakeGear++;
+                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
+                }
+                if (event.joystickButton.button == 2) {
+                    std::cout << "Sequential downshift\n";
+                    fakeGear--;
+                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
+                }
+                if (event.joystickButton.button == 4) {
+                    std::cout << "Clutch in\n";
+                    fakeClutched = true;
+                    car.setGear(0);
+                }
+            }
+
+            if (event.type == sf::Event::JoystickButtonReleased) {
+                if (event.joystickButton.button == 4) {
+                    std::cout << "Clutch out\n";
+                    fakeClutched = false;
+                    car.setGear(fakeGear);
+                }
+            }
+            if (event.type == sf::Event::JoystickMoved) {
+                // std::cout << "new position on axis " << event.joystickMove.axis << " = " << event.joystickMove.position <<  "\n";
+                if (event.joystickMove.axis == 3) {
+                    std::cout << "Accelerator at " << event.joystickMove.position + 100 << " \n";
+                    car.setGas(event.joystickMove.position + 100);
+                }
+                if (event.joystickMove.axis == 2) {
+                    std::cout << "Brake at intensity: " << event.joystickMove.position << " \n";
+                    car.brakeFactor = 1 - 0.0001 * (event.joystickMove.position + 100);
+                }
             }
         }
 
@@ -265,7 +317,7 @@ int main() {
         // Wheel speed, rpm whatever
         speedo.setRotation(car.getWheelSpeed() / 100);
         // Set gauge display
-        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(car.getGear()) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) + " FPS");
+        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(fakeGear) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) + " FPS");
 
         // Set the fmod RPM parameter
         result = carSoundEventInstance->setParameterByName("RPM", car.getRPM());
