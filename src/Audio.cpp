@@ -7,10 +7,9 @@
 #include "fmod/fmod_studio.hpp"
 #include "fmod/fmod_studio_common.h"
 
-class CarSound {
-   public:
-    // Revving sound
-    FMOD::Studio::EventDescription* engineDescription = nullptr;
+enum class CarSoundDescriptions {
+    // Engine revs
+    engineDescription
     FMOD::Studio::EventInstance* engineInstance = nullptr;
     // Upshift effects
     FMOD::Studio::EventDescription* upshiftDescription = nullptr;
@@ -18,58 +17,55 @@ class CarSound {
     // Downshift effects
     FMOD::Studio::EventDescription* downshiftDescription = nullptr;
     FMOD::Studio::EventInstance* downshiftInstance = nullptr;
-    // Road noises
-    FMOD::Studio::EventDescription* roadDescription = nullptr;
-    FMOD::Studio::EventInstance* roadInstance = nullptr;
-    // Starter onramp
-    FMOD::Studio::EventDescription* starterStartDescription = nullptr;
-    FMOD::Studio::EventInstance* startStartInstance = nullptr;
-    // Starter middle
-    FMOD::Studio::EventDescription* starterMiddleDescription = nullptr;
-    FMOD::Studio::EventInstance* startMiddleInstance = nullptr;
-    // Starter done
-    FMOD::Studio::EventDescription* starterDoneDescription = nullptr;
-    FMOD::Studio::EventInstance* startDoneInstance = nullptr;
+    // Road noises + transmission whining
+    FMOD::Studio::EventDescription* speedDescription = nullptr;
+    FMOD::Studio::EventInstance* speedInstance = nullptr;
+    // Starter
+    FMOD::Studio::EventDescription* starterDescription = nullptr;
+    FMOD::Studio::EventInstance* starterInstance = nullptr;
+    // High load fx like turbo
+    FMOD::Studio::EventDescription* turboDescription = nullptr;
+    FMOD::Studio::EventInstance* turboInstance = nullptr;
 };
 
 class SoundManager {
    public:
-    FMOD::Studio::System* audioSystem = nullptr;
     CarSound mainCar;
-    std::vector<FMOD::Studio::Bank*> loadedSoundBanks;
+    FMOD::Studio::System* audioSystem = nullptr;
+    std::map<const char*, FMOD::Studio::Bank*> bankMap;  // name of bank in filesystem --> pointer to Bank
 
-    FMOD_RESULT createSystem() {
-        FMOD_RESULT result = FMOD::Studio::System::create(&audioSystem);
+    FMOD_RESULT loadBank(const char* bankName) {
+        FMOD_RESULT result = audioSystem->loadBankFile(bankName, FMOD_STUDIO_LOAD_BANK_NORMAL, &bankMap[bankName]);
+        std::cout << "Audio: Loaded sound bank " << bankName << std::endl;
         if (result != FMOD_OK) {
-            std::cerr << "FMOD Error - Could not create system"
-                      << " Error code: " << result << ", " << FMOD_ErrorString(result) << std::endl;
-        }
-        return result;
-    }
-
-    FMOD_RESULT initAudio(int maxChannels) {
-        FMOD_RESULT result = audioSystem->initialize(maxChannels, FMOD_STUDIO_INIT_NORMAL, FMOD_INIT_NORMAL, nullptr);
-        if (result != FMOD_OK) {
-            std::cerr << "FMOD Error - Could not initialize audio"
-                      << " Error code: " << result << ", " << FMOD_ErrorString(result) << std::endl;
+            std::cerr << "Loading sound bank failed: " << FMOD_ErrorString(result) << std::endl;
             return result;
         }
         return result;
     }
-    FMOD_RESULT loadSoundBank(const std::string& name, const std::string& filePath) {
-        FMOD::Studio::Bank* bank = nullptr;
-        FMOD_RESULT result = audioSystem->loadBankFile(filePath.c_str(), FMOD_STUDIO_LOAD_BANK_NORMAL, &bank);
+    FMOD_RESULT unloadBank(const char* bankName) {
+        FMOD_RESULT result = bankMap[bankName]->unload();
+        std::cout << "Audio: Unloaded sound bank " << bankName << std::endl;
         if (result != FMOD_OK) {
-            std::cerr << "FMOD Error - Could not load Bank"
-                      << " Error code: " << result << ", " << FMOD_ErrorString(result) << std::endl;
+            std::cerr << "Unloading sound bank failed: " << FMOD_ErrorString(result) << std::endl;
             return result;
         }
-        loadedSoundBanks.emplace_back(bank);
         return result;
     }
-
-    FMOD_RESULT getEventDescription(const char* eventName) {
-        // FMOD_RESULT result = audioSystem->getEvent(eventName, mainCar);
-        return FMOD_OK;
+    void debugListBanks() {
+        std::cout << "Debug: List of bank names:" << std::endl;
+        for (const auto& pair : bankMap) {
+            std::cout << "Info - bankMap has: " << pair.first << std::endl;
+        }
     }
+    FMOD_RESULT getEvent(){
+            const char* eventName = "event:/Vehicles/Sport Sedan";  // Replace with your event path
+    FMOD_RESULT result = audioSystem->getEvent(eventName, &carSoundEventDescription);
+    if (result != FMOD_OK) {
+        std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
+        return result;
+    }
+    return result;
+    }
+
 };

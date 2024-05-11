@@ -23,17 +23,16 @@ void manageCar(Car* car, std::atomic<bool>* run) {
     }
 }
 
-void carStarter(Car* car, bool* isStarting) {
-                            std::this_thread::sleep_for(std::chrono::milliseconds(800));
-                            std::cout << "Vroom!\n";
-                            car->setRPM(800);
-                            car->setGas(150);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(300));
-                            car->setGas(0);
-                            std::this_thread::sleep_for(std::chrono::milliseconds(1500));
-                            *isStarting = false;
-                        }
-
+void carStarter(Car* car, bool* m_isStarting) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(800));
+    std::cout << "Vroom!\n";
+    car->setRPM(800);
+    car->setGas(150);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    car->setGas(0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    *m_isStarting = false;
+}
 
 int main() {
     FMOD::Studio::System* audioSystem = nullptr;
