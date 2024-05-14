@@ -305,8 +305,9 @@ int main() {
                     car.setGas(event.joystickMove.position + 100);
                 }
                 if (event.joystickMove.axis == 2) {
-                    std::cout << "Brake at intensity: " << event.joystickMove.position << " \n";
-                    car.brakeFactor = 1 - 0.0001 * (event.joystickMove.position + 100);
+                    double brakeIntensity = 1 - 0.0001 * (event.joystickMove.position + 100);
+                    std::cout << "Brake at intensity: " << brakeIntensity << " \n";
+                    car.brakeFactor = brakeIntensity;
                 }
             }
         }
