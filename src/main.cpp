@@ -71,7 +71,7 @@ int main() {
     }
 
     // Get the Vehicle/Car Sound event
-    const char* eventName = "event:/Vehicles/Sport Sedan";  // Replace with your event path
+    const char* eventName = "event:/Vehicles/Chrysler V6/Engine";
     result = audioSystem->getEvent(eventName, &carSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
@@ -91,7 +91,7 @@ int main() {
         std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
         return -1;
     }
-    const char* starterEventName = "event:/Vehicles/Starters/Full";  // Replace with your event path
+    const char* starterEventName = "event:/Vehicles/Chrysler V6/Starter";
     result = audioSystem->getEvent(starterEventName, &starterSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;

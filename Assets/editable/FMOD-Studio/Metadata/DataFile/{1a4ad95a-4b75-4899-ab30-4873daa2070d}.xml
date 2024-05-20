@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objects serializationModel="Studio.02.02.00">
-	<object class="EncodableAsset" id="{3b14ce85-f7f6-4d74-a6e6-a97b34dc011f}">
+	<object class="DataFile" id="{1a4ad95a-4b75-4899-ab30-4873daa2070d}">
 		<property name="assetPath">
-			<value>Vehicles/Sports - Chrysler V6/</value>
+			<value>Vehicles/Sports - Chrysler V6/project.aup3</value>
 		</property>
 		<relationship name="masterAssetFolder">
 			<destination>{4c43130b-9186-4fb6-9d65-a9acdac70927}</destination>

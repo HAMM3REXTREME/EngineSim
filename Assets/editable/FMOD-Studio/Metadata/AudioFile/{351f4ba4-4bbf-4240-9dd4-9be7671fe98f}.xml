@@ -2,7 +2,7 @@
 <objects serializationModel="Studio.02.02.00">
 	<object class="AudioFile" id="{351f4ba4-4bbf-4240-9dd4-9be7671fe98f}">
 		<property name="assetPath">
-			<value>Vehicles/Sports Sedan/2000.wav</value>
+			<value>Vehicles/Sports - Chrysler V6/2000.wav</value>
 		</property>
 		<property name="frequencyInKHz">
 			<value>44.0999985</value>

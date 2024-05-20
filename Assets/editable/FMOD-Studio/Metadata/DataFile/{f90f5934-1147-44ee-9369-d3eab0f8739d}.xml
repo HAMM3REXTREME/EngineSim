@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <objects serializationModel="Studio.02.02.00">
-	<object class="EncodableAsset" id="{aebd8b11-4557-4885-9ad3-be61dfba7a5f}">
+	<object class="DataFile" id="{f90f5934-1147-44ee-9369-d3eab0f8739d}">
 		<property name="assetPath">
-			<value>Vehicles/Starters/</value>
+			<value>Vehicles/Funny Car/sounds.aup3</value>
 		</property>
 		<relationship name="masterAssetFolder">
 			<destination>{4c43130b-9186-4fb6-9d65-a9acdac70927}</destination>
