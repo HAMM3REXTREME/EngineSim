@@ -71,7 +71,7 @@ int main() {
     }
 
     // Get the Vehicle/Car Sound event
-    const char* eventName = "event:/Vehicles/Chrysler V6/Engine";
+    const char* eventName = "event:/Vehicles/GM LS/Engine";
     result = audioSystem->getEvent(eventName, &carSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
@@ -325,7 +325,7 @@ int main() {
             std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
         }
-        result = carSoundEventInstance->setParameterByName("Load", car.revLimitTick > 0 ? 0 : car.getGas() / 180);
+        result = carSoundEventInstance->setParameterByName("Load", car.revLimitTick > 0 ? 0 : car.getGas() / 80);
         if (result != FMOD_OK) {
             std::cerr << "Setting Load parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
