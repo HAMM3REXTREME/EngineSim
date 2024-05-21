@@ -231,7 +231,7 @@ int main() {
                 // Brakes
                 if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
                     std::cout << "Brakes on\n";
-                    car.brakeFactor = 0.996;
+                    car.linearWheelDrag = 10;
                 }
                 if (event.key.code == sf::Keyboard::Key::S) {
                     // Only allow starting if not already in the process of being started, otherwise we can attempt to start.
@@ -264,7 +264,7 @@ int main() {
                 // Disengage brakes
                 if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
                     std::cout << "Brakes released\n";
-                    car.brakeFactor = 1;
+                    car.linearWheelDrag = 0;
                 }
                 if (event.key.code == sf::Keyboard::Key::LShift) {
                     std::cout << "Clutch out\n";
@@ -307,7 +307,7 @@ int main() {
                 if (event.joystickMove.axis == 2) {
                     double brakeIntensity = 1 - 0.0001 * (event.joystickMove.position + 100);
                     std::cout << "Brake at intensity: " << brakeIntensity << " \n";
-                    car.brakeFactor = brakeIntensity;
+                    car.linearWheelDrag = brakeIntensity;
                 }
             }
         }
@@ -325,7 +325,7 @@ int main() {
             std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
         }
-        result = carSoundEventInstance->setParameterByName("Load", car.revLimitTick > 0 ? 0 : car.getGas() / 80);
+        result = carSoundEventInstance->setParameterByName("Load", car.revLimitTick > 0 ? 0 : car.getGas() / 180);
         if (result != FMOD_OK) {
             std::cerr << "Setting Load parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;

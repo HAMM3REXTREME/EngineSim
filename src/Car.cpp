@@ -43,12 +43,14 @@ void Car::tick() {
 
     // Set Wheel RPM depending on the engine rpm, current gear ratio and coasting drag
     if (gear >= 1) {
-        wheelRPM = rpm * gearRatios[gear] * coastLazyValue * brakeFactor;
-        rpm = rpm * brakeFactor * coastLazyValue;
+        wheelRPM = rpm * gearRatios[gear] * quadraticWheelDrag - linearWheelDrag;
+        rpm = rpm * quadraticWheelDrag - (linearWheelDrag/gearRatios[gear]);
     } else {
         // Just apply the rolling and brake resistance if in neutral
-        wheelRPM = wheelRPM * coastLazyValue * brakeFactor;
+        wheelRPM = wheelRPM * quadraticWheelDrag - linearWheelDrag;
     }
+    rpm < 0 ? rpm = 0 : 0;
+    wheelRPM < 0 ? wheelRPM = 0 : 0;
 
     rpmDamper.addValue(rpm);
     wheelSpeedDamper.addValue(wheelRPM);
@@ -75,21 +77,22 @@ void Car::controlIdle() {
 
 void Car::addEnergy() {
     if (rpm > 50) {
-        rpm += horses / rpm;  // Don't divide by zero
+        rpm += Torque;  // Don't divide by zero
         if (ignition) {
             if (rpm <= revLimit) {  // Rev limiter thingy
                 if (revLimitTick <= 0) {
-                    horses = rpm * (gas + idleValve) * gearThrottleResponses[gear] * brakeFactor;
+                    Torque = (gas + idleValve) * gearThrottleResponses[gear];
                 } else {
                     revLimitTick--;
                 }
             } else {
+                // Start a rev limit cut cycle if rpm exceeds the limit
                 revLimitTick = defaultRevLimitTick;
-                horses = 0;
+                Torque = 0;
             }
 
         } else {
-            horses = 0;
+            Torque = 0;
         }
     }
 }
@@ -105,4 +108,4 @@ float Car::getRPM() { return rpmDamper.getAverage(); }
 void Car::setWheelSpeed(float newSpeed) { wheelRPM = newSpeed; }  // Sets wheelRPM for next tick
 float Car::getWheelSpeed() { return wheelSpeedDamper.getAverage(); }
 
-float Car::getHorses() { return horses; }
+float Car::getTorque() { return Torque; }
