@@ -16,6 +16,28 @@
 #include "fmod/fmod_studio.hpp"
 #include "fmod/fmod_studio_common.h"
 
+
+// Function to convert string GUID to FMOD_GUID
+FMOD_GUID StringToGUID(const char* guidString) {
+    FMOD_GUID guid;
+    unsigned long p0;
+    unsigned int p1, p2;
+    unsigned int p3[8];
+
+    sscanf(guidString, "%8lx-%4x-%4x-%2x%2x-%2x%2x%2x%2x%2x%2x", &p0, &p1, &p2,
+           &p3[0], &p3[1], &p3[2], &p3[3], &p3[4], &p3[5], &p3[6], &p3[7]);
+
+    guid.Data1 = p0;
+    guid.Data2 = p1;
+    guid.Data3 = p2;
+    for (int i = 0; i < 8; i++) {
+        guid.Data4[i] = (unsigned char)p3[i];
+    }
+
+    return guid;
+}
+
+
 void manageCar(Car* car, std::atomic<bool>* run) {
     while (*run) {
         car->tick();
@@ -71,7 +93,7 @@ int main() {
     }
 
     // Get the Vehicle/Car Sound event
-    const char* eventName = "event:/Vehicles/GM LS/Engine";
+    const char* eventName = "event:/cars/tatuusfa1/engine_ext";
     result = audioSystem->getEvent(eventName, &carSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
@@ -91,7 +113,7 @@ int main() {
         std::cerr << "Starting event instance failed: " << FMOD_ErrorString(result) << std::endl;
         return -1;
     }
-    const char* starterEventName = "event:/Vehicles/Chrysler V6/Starter";
+    const char* starterEventName = "event:/cars/tatuusfa1/engine_ext";
     result = audioSystem->getEvent(starterEventName, &starterSoundEventDescription);
     if (result != FMOD_OK) {
         std::cerr << "Getting event description failed: " << FMOD_ErrorString(result) << std::endl;
@@ -274,17 +296,17 @@ int main() {
             }
             if (event.type == sf::Event::JoystickButtonPressed) {
                 // std::cout << "Pressed controller: " << event.joystickButton.button <<"\n";
-                if (event.joystickButton.button == 0) {
+                if (event.joystickButton.button == 4) {
                     std::cout << "Sequential upshift\n";
                     fakeGear++;
                     fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
                 }
-                if (event.joystickButton.button == 2) {
+                if (event.joystickButton.button == 5) {
                     std::cout << "Sequential downshift\n";
                     fakeGear--;
                     fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
                 }
-                if (event.joystickButton.button == 4) {
+                if (event.joystickButton.button == 999) {
                     std::cout << "Clutch in\n";
                     fakeClutched = true;
                     car.setGear(0);
@@ -292,7 +314,7 @@ int main() {
             }
 
             if (event.type == sf::Event::JoystickButtonReleased) {
-                if (event.joystickButton.button == 4) {
+                if (event.joystickButton.button == 999) {
                     std::cout << "Clutch out\n";
                     fakeClutched = false;
                     car.setGear(fakeGear);
@@ -300,12 +322,12 @@ int main() {
             }
             if (event.type == sf::Event::JoystickMoved) {
                 // std::cout << "new position on axis " << event.joystickMove.axis << " = " << event.joystickMove.position <<  "\n";
-                if (event.joystickMove.axis == 3) {
-                    std::cout << "Accelerator at " << event.joystickMove.position + 100 << " \n";
-                    car.setGas(event.joystickMove.position + 100);
-                }
                 if (event.joystickMove.axis == 2) {
-                    double brakeIntensity = 1 - 0.0001 * (event.joystickMove.position + 100);
+                    std::cout << "Accelerator at " << -event.joystickMove.position + 100 << " \n";
+                    car.setGas(-event.joystickMove.position + 100);
+                }
+                if (event.joystickMove.axis == 3) {
+                    double brakeIntensity = (-event.joystickMove.position + 100)/10;
                     std::cout << "Brake at intensity: " << brakeIntensity << " \n";
                     car.linearWheelDrag = brakeIntensity;
                 }
@@ -320,12 +342,12 @@ int main() {
         gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(fakeGear) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) + " FPS");
 
         // Set the fmod RPM parameter
-        result = carSoundEventInstance->setParameterByName("RPM", car.getRPM());
+        result = carSoundEventInstance->setParameterByName("rpms", car.getRPM()*1.5);
         if (result != FMOD_OK) {
             std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
         }
-        result = carSoundEventInstance->setParameterByName("Load", car.revLimitTick > 0 ? 0 : car.getGas() / 80);
+        result = carSoundEventInstance->setParameterByName("throttle", car.revLimitTick > 0 ? 0 : car.getGas() / 180);
         if (result != FMOD_OK) {
             std::cerr << "Setting Load parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;
