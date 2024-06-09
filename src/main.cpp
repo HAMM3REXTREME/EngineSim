@@ -16,7 +16,6 @@
 #include "fmod/fmod_studio.hpp"
 #include "fmod/fmod_studio_common.h"
 
-
 // Function to convert string GUID to FMOD_GUID
 FMOD_GUID StringToGUID(const char* guidString) {
     FMOD_GUID guid;
@@ -24,8 +23,7 @@ FMOD_GUID StringToGUID(const char* guidString) {
     unsigned int p1, p2;
     unsigned int p3[8];
 
-    sscanf(guidString, "%8lx-%4x-%4x-%2x%2x-%2x%2x%2x%2x%2x%2x", &p0, &p1, &p2,
-           &p3[0], &p3[1], &p3[2], &p3[3], &p3[4], &p3[5], &p3[6], &p3[7]);
+    sscanf(guidString, "%8lx-%4x-%4x-%2x%2x-%2x%2x%2x%2x%2x%2x", &p0, &p1, &p2, &p3[0], &p3[1], &p3[2], &p3[3], &p3[4], &p3[5], &p3[6], &p3[7]);
 
     guid.Data1 = p0;
     guid.Data2 = p1;
@@ -36,7 +34,6 @@ FMOD_GUID StringToGUID(const char* guidString) {
 
     return guid;
 }
-
 
 void manageCar(Car* car, std::atomic<bool>* run) {
     while (*run) {
@@ -54,19 +51,6 @@ void carStarter(Car* car, bool* m_isStarting) {
     car->setGas(0);
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     *m_isStarting = false;
-}
-
-void upShift(Car* car){
-    int newGear = car->getGear() + 1;
-    car->setGear(0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
-    car->setGear(newGear);
-}
-void downShift(Car* car){
-    int newGear = car->getGear() - 1;
-    car->setGear(0);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
-    car->setGear(newGear);
 }
 
 int main() {
@@ -190,31 +174,18 @@ int main() {
     userThrottleMap[sf::Keyboard::Key::R] = 130;
     userThrottleMap[sf::Keyboard::Key::T] = 150;
 
-    // Keyboard to gears
-    std::map<sf::Keyboard::Key, int> userGearShifter;
-    userGearShifter[sf::Keyboard::Key::Num0] = 0;
-    userGearShifter[sf::Keyboard::Key::Num1] = 1;
-    userGearShifter[sf::Keyboard::Key::Num2] = 2;
-    userGearShifter[sf::Keyboard::Key::Num3] = 3;
-    userGearShifter[sf::Keyboard::Key::Num4] = 4;
-    userGearShifter[sf::Keyboard::Key::Num5] = 5;
-    userGearShifter[sf::Keyboard::Key::Num6] = 6;
-    // Numpad H-pattern
-    userGearShifter[sf::Keyboard::Key::Numpad5] = 0;
-    userGearShifter[sf::Keyboard::Key::Numpad7] = 1;
-    userGearShifter[sf::Keyboard::Key::Numpad1] = 2;
-    userGearShifter[sf::Keyboard::Key::Numpad8] = 3;
-    userGearShifter[sf::Keyboard::Key::Numpad2] = 4;
-    userGearShifter[sf::Keyboard::Key::Numpad9] = 5;
-    userGearShifter[sf::Keyboard::Key::Numpad3] = 6;
-
     Car car;
     std::atomic<bool> carRunning = true;
     std::thread carThread{manageCar, &car, &carRunning};
 
     bool isStarting = false;  // Starter sequence thingy
-    bool fakeClutched = false;
-    int fakeGear = car.getGear();
+
+    int frame = 0;
+
+    int lastGear = 0;
+    int upShiftFrame = 0;
+    int downShiftFrame = 0;
+    int wishGas = 0;
 
     // Main loop
     while (window.isOpen()) {
@@ -222,6 +193,8 @@ int main() {
 
         sf::Time elapsed = clock.restart();
         float fps = 1.0f / elapsed.asSeconds();
+
+        frame++;
 
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
@@ -232,6 +205,34 @@ int main() {
                 sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
                 window.setView(sf::View(visibleArea));
             }
+            if (event.type == sf::Event::JoystickButtonReleased) {
+            }
+            if (event.type == sf::Event::JoystickMoved) {
+                // std::cout << "new position on axis " << event.joystickMove.axis << " = " << event.joystickMove.position <<  "\n";
+                if (event.joystickMove.axis == 2) {
+                    std::cout << "Accelerator at " << -event.joystickMove.position + 100 << " \n";
+                    wishGas = -event.joystickMove.position + 100;
+                }
+                if (event.joystickMove.axis == 3) {
+                    double brakeIntensity = (-event.joystickMove.position + 100) / 10;
+                    std::cout << "Brake at intensity: " << brakeIntensity << " \n";
+                    car.linearWheelDrag = brakeIntensity;
+                }
+            }
+            // Key release events
+            if (event.type == sf::Event::KeyReleased) {
+                // If one of the keys in our throttle map is released, release the throttle
+                auto it = userThrottleMap.find(event.key.code);
+                if (it != userThrottleMap.end()) {
+                    std::cout << "Accelerator released\n";
+                    car.setGas(0);
+                }
+                // Disengage brakes
+                if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
+                    std::cout << "Brakes released\n";
+                    car.linearWheelDrag = 0;
+                }
+            }
             // Key press events
             if (event.type == sf::Event::KeyPressed) {
                 // Accelerator options
@@ -239,29 +240,6 @@ int main() {
                 if (it != userThrottleMap.end()) {
                     std::cout << "Accelerator at " << it->second << " \n";
                     car.setGas(it->second);
-                }
-                // Gear shifter
-                auto gearIt = userGearShifter.find(event.key.code);
-                if (gearIt != userGearShifter.end()) {
-                    std::cout << "Shifted to " << gearIt->second << " \n";
-                    fakeGear = gearIt->second;
-                    fakeClutched ? car.setGear(0) : car.setGear(gearIt->second);
-                }
-                // Shift to N
-                if (event.key.code == sf::Keyboard::Key::LShift) {
-                    std::cout << "Clutch in\n";
-                    fakeClutched = true;
-                    car.setGear(0);
-                }
-                if (event.key.code == sf::Keyboard::Key::Up) {
-                    std::cout << "Sequential upshift\n";
-                    fakeGear++;
-                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
-                }
-                if (event.key.code == sf::Keyboard::Key::Down) {
-                    std::cout << "Sequential downshift\n";
-                    fakeGear--;
-                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
                 }
                 // Brakes
                 if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
@@ -287,75 +265,44 @@ int main() {
                     car.ignition = !car.ignition;
                     std::cout << "Set ignition to " << car.ignition << "\n";
                 }
-            }
-            // Key release events
-            if (event.type == sf::Event::KeyReleased) {
-                // If one of the keys in our throttle map is released, release the throttle
-                auto it = userThrottleMap.find(event.key.code);
-                if (it != userThrottleMap.end()) {
-                    std::cout << "Accelerator released\n";
-                    car.setGas(0);
+                if (event.key.code == sf::Keyboard::Key::Up) {
+                    std::cout << "Upshift\n";
                 }
-                // Disengage brakes
-                if (event.key.code == sf::Keyboard::Key::Numpad0 || event.key.code == sf::Keyboard::Key::Period) {
-                    std::cout << "Brakes released\n";
-                    car.linearWheelDrag = 0;
-                }
-                if (event.key.code == sf::Keyboard::Key::LShift) {
-                    std::cout << "Clutch out\n";
-                    fakeClutched = false;
-                    car.setGear(fakeGear);
-                }
-            }
-            if (event.type == sf::Event::JoystickButtonPressed) {
-                // std::cout << "Pressed controller: " << event.joystickButton.button <<"\n";
-                if (event.joystickButton.button == 4) {
-                    std::cout << "Sequential upshift\n";
-                    fakeGear++;
-                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
-                }
-                if (event.joystickButton.button == 5) {
-                    std::cout << "Sequential downshift\n";
-                    fakeGear--;
-                    fakeClutched ? car.setGear(0) : car.setGear(fakeGear);
-                }
-                if (event.joystickButton.button == 999) {
-                    std::cout << "Clutch in\n";
-                    fakeClutched = true;
-                    car.setGear(0);
+                if (event.key.code == sf::Keyboard::Key::Down) {
+                    std::cout << "Downshift\n";
+                    car.setGear(car.getGear() - 1);
                 }
             }
 
-            if (event.type == sf::Event::JoystickButtonReleased) {
-                if (event.joystickButton.button == 999) {
-                    std::cout << "Clutch out\n";
-                    fakeClutched = false;
-                    car.setGear(fakeGear);
-                }
-            }
-            if (event.type == sf::Event::JoystickMoved) {
-                // std::cout << "new position on axis " << event.joystickMove.axis << " = " << event.joystickMove.position <<  "\n";
-                if (event.joystickMove.axis == 2) {
-                    std::cout << "Accelerator at " << -event.joystickMove.position + 100 << " \n";
-                    car.setGas(-event.joystickMove.position + 100);
-                }
-                if (event.joystickMove.axis == 3) {
-                    double brakeIntensity = (-event.joystickMove.position + 100)/10;
-                    std::cout << "Brake at intensity: " << brakeIntensity << " \n";
-                    car.linearWheelDrag = brakeIntensity;
-                }
-                if (event.joystickMove.axis == 1) {
-                    if (event.joystickMove.position <= 0){
-                                            std::cout << "Clutch in\n";
-                    fakeClutched = true;
+            if (event.type == sf::Event::JoystickButtonPressed) {
+                // std::cout << "Pressed controller: " << event.joystickButton.button <<"\n";
+                if (event.joystickButton.button == 4) {
+                    std::cout << "Upshift\n";
+                    lastGear = car.getGear();
                     car.setGear(0);
-                    } else {
-                                            std::cout << "Clutch out\n";
-                    fakeClutched = false;
-                    car.setGear(fakeGear);
-                    }
+                    car.setGas(0);
+                    upShiftFrame = frame + 15;
+                }
+                if (event.joystickButton.button == 5) {
+                    std::cout << "Downshift\n";
+                    lastGear = car.getGear();
+                    car.setGear(0);
+                    car.setGas(150);
+                    downShiftFrame = frame + 15;
                 }
             }
+        }
+
+        if (upShiftFrame == 0 && downShiftFrame == 0) {
+            car.setGas(wishGas);
+        }
+        if (frame == upShiftFrame) {
+            car.setGear(lastGear + 1);
+            upShiftFrame = 0;
+        }
+        if (frame == downShiftFrame) {
+            car.setGear(lastGear - 1);
+            downShiftFrame = 0;
         }
 
         // Move needles
@@ -363,10 +310,10 @@ int main() {
         // Wheel speed, rpm whatever
         speedo.setRotation(car.getWheelSpeed() / 100);
         // Set gauge display
-        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(fakeGear) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) + " FPS");
+        gaugeValue.setString(std::to_string((int)car.getRPM()) + " RPM\n" + std::to_string(car.getGear()) + "\n" + std::to_string((int)car.getWheelSpeed() / 100) + " kmh\n" + std::to_string((int)fps) + " FPS\n" + std::to_string(frame));
 
         // Set the fmod RPM parameter
-        result = carSoundEventInstance->setParameterByName("rpms", car.getRPM()*1.5);
+        result = carSoundEventInstance->setParameterByName("rpms", car.getRPM() * 1.5);
         if (result != FMOD_OK) {
             std::cerr << "Setting RPM parameter failed: " << FMOD_ErrorString(result) << std::endl;
             return -1;

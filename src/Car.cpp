@@ -44,7 +44,7 @@ void Car::tick() {
     // Set Wheel RPM depending on the engine rpm, current gear ratio and coasting drag
     if (gear >= 1) {
         wheelRPM = rpm * gearRatios[gear] * quadraticWheelDrag - linearWheelDrag;
-        rpm = rpm * quadraticWheelDrag - (linearWheelDrag/gearRatios[gear]);
+        rpm = rpm * quadraticWheelDrag - (linearWheelDrag / gearRatios[gear]);
     } else {
         // Just apply the rolling and brake resistance if in neutral
         wheelRPM = wheelRPM * quadraticWheelDrag - linearWheelDrag;
@@ -58,13 +58,13 @@ void Car::tick() {
 
 void Car::setGear(int newGear) {
     gear = newGear;
-    if (gear > 0) {
-        if (wheelRPM <= 0 && rpm >= 700) {  // 'Dumping' the clutch won't stall
-            wheelRPM = 100;             // rpm + clutch would be 500 (since clutch takes a rev difference that it 'smoothly' applies)
-        }
-        clutch = wheelRPM / gearRatios[gear] - rpm;
-
+    if (gear <= 0) {
+        return;
     }
+    if (wheelRPM <= 0 && rpm >= 700) {  // 'Dumping' the clutch won't stall
+        wheelRPM = rpm/7;
+    }
+    clutch = wheelRPM / gearRatios[gear] - rpm;
 }
 
 void Car::controlIdle() {

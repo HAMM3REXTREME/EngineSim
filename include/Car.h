@@ -27,9 +27,9 @@ class Car {
     int revLimitTick = 0;         // no-gas ticks remaining
     int revLimit = 8000;          // Gas will be cut when rev limit is reached
 
-    float gearRatios[7] = {0, 0.8, 1.3, 1.8, 2.3, 2.7, 3.5};                          // Gearing ratios - Used to match engine rpm to wheel rpm
-    float gearLazyValues[7] = {0.99, 0.999, 0.9994, 0.9995, 0.9996, 0.9997, 0.9998};  // Engine time for revs to settle back - values closer to one need more time to go back to idle cause less resistance (exponential decay)
-    float gearThrottleResponses[7] = {1, 0.3, 0.18, 0.15, 0.13, 0.11, 0.09};          // Throttle sensitivity - Should feel lower in higher gears since the high gears is hard on the engine.
+    float gearRatios[8] = {0, 0.8, 1.3, 1.8, 2.3, 2.7, 3.5, 4};                          // Gearing ratios - Used to match engine rpm to wheel rpm
+    float gearLazyValues[8] = {0.99, 0.999, 0.9994, 0.9995, 0.9996, 0.9997, 0.9998, 0.9999};  // Engine time for revs to settle back - values closer to one need more time to go back to idle cause less resistance (exponential decay)
+    float gearThrottleResponses[8] = {1, 0.3, 0.18, 0.15, 0.13, 0.11, 0.09, 0.06};          // Throttle sensitivity - Should feel lower in higher gears since the high gears is hard on the engine.
 
     // Wheel resistances
     double quadraticWheelDrag = 0.999;  // Driving drag on wheels (and also engine if in gear)
