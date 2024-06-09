@@ -56,6 +56,19 @@ void carStarter(Car* car, bool* m_isStarting) {
     *m_isStarting = false;
 }
 
+void upShift(Car* car){
+    int newGear = car->getGear() + 1;
+    car->setGear(0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    car->setGear(newGear);
+}
+void downShift(Car* car){
+    int newGear = car->getGear() - 1;
+    car->setGear(0);
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    car->setGear(newGear);
+}
+
 int main() {
     FMOD::Studio::System* audioSystem = nullptr;
     FMOD::Studio::Bank* masterBank = nullptr;
@@ -330,6 +343,17 @@ int main() {
                     double brakeIntensity = (-event.joystickMove.position + 100)/10;
                     std::cout << "Brake at intensity: " << brakeIntensity << " \n";
                     car.linearWheelDrag = brakeIntensity;
+                }
+                if (event.joystickMove.axis == 1) {
+                    if (event.joystickMove.position <= 0){
+                                            std::cout << "Clutch in\n";
+                    fakeClutched = true;
+                    car.setGear(0);
+                    } else {
+                                            std::cout << "Clutch out\n";
+                    fakeClutched = false;
+                    car.setGear(fakeGear);
+                    }
                 }
             }
         }

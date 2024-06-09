@@ -59,11 +59,11 @@ void Car::tick() {
 void Car::setGear(int newGear) {
     gear = newGear;
     if (gear > 0) {
-        clutch = wheelRPM / gearRatios[gear] - rpm;
         if (wheelRPM <= 0 && rpm >= 700) {  // 'Dumping' the clutch won't stall
-            clutch = 500 - rpm;             // rpm + clutch would be 500 (since clutch takes a rev difference that it 'smoothly' applies)
-            return;
+            wheelRPM = 100;             // rpm + clutch would be 500 (since clutch takes a rev difference that it 'smoothly' applies)
         }
+        clutch = wheelRPM / gearRatios[gear] - rpm;
+
     }
 }
 
